@@ -16,7 +16,7 @@
                 <div class="login-card" id="login-card">
                     <h2>Giriş Yap</h2>
                     <form id="login-form">
-                        <input type="text" id="login-username" placeholder="Kullanıcı Adı" required>
+                        <input type="text" id="login-username" placeholder="Kullanıcı Adı veya E-posta" required>
                         <input type="password" id="login-password" placeholder="Şifre" required>
                         <button type="submit">Giriş Yap</button>
                         <div id="login-error" style="color:red; margin-top:8px; display:none;"></div>
@@ -26,7 +26,7 @@
                 <div class="register-card login-card" id="register-card" style="display:none;">
                     <h2>Kayıt Ol</h2>
                     <form id="register-form">
-                        <input type="text" id="register-username" placeholder="Kullanıcı Adı" required>
+                        <input type="text" id="register-username" placeholder="Kullanıcı Adı" maxlength="20" required>
                         <input type="email" id="register-email" placeholder="E-posta" required>
                         <input type="password" id="register-password" placeholder="Şifre" required>
                         <input type="password" id="register-password2" placeholder="Şifre Tekrar" required>
@@ -47,6 +47,7 @@
                     <div class="user-card" id="user-card">
                         <img id="user-avatar" src="https://ui-avatars.com/api/?name=&background=222&color=fff&size=96" alt="Avatar" class="user-avatar">
                         <div class="user-card-name" id="user-card-name">Talha</div>
+                        <div class="user-card-username" id="user-card-username" style="font-size:0.98em; color:#bbb; margin-top:2px;">@talha</div>
                     </div>
                     <!-- Kullanıcı bilgileri burada gösterilecek -->
                     <h2>Kullanıcı Bilgileri</h2>
@@ -59,26 +60,55 @@
             <div class="panel-navbar">
                 <span class="panel-navbar-title">Sohbet</span>
             </div>
-            <div class="chat-channel">
+            <div class="chat-channel" style="position:relative;">
                 <div class="chat-header">
                     Aktif Kullanıcılar Sohbet Kanalı
                 </div>
                 <div class="chat-messages" id="chat-messages">
                     <!-- Sohbet mesajları burada listelenecek -->
-                    <div><strong>Ahmet:</strong> Merhaba!</div>
-                    <div><strong>Ayşe:</strong> Selamlar!</div>
                 </div>
-                <div class="chat-input-area">
-                    <input type="text" id="chat-input" placeholder="Mesajınızı yazın...">
-                    <button id="send-btn">Gönder</button>
-                </div>
+                <form class="chat-input-area" id="chat-form" autocomplete="off" style="background:#222; border-top:1.5px solid #444;">
+                    <input type="text" id="chat-input" placeholder="Mesajınızı yazın..." style="background:#222; color:#fff; border:1.5px solid #444; border-radius:6px; padding:10px 14px; font-size:1em; outline:none; transition:border 0.2s;">
+                    <button id="send-btn" type="submit" style="padding:10px 24px; border-radius:6px; border:none; background:#ffd700; color:#222; font-weight:bold; font-size:1.08em; cursor:pointer; margin-left:8px; transition:background 0.18s, color 0.18s;">Gönder</button>
+                </form>
             </div>
         </div>
     </div>
     <!-- Çıkış menüsü (sayfanın en sonunda, user-card dışında) -->
     <div id="logout-menu" style="display:none; position:fixed; background:#232323; border-radius:8px; box-shadow:0 4px 16px #0006; padding:0; z-index:1000;">
+        <div class="logout-option" id="profile-edit-btn" tabindex="0">Profili Düzenle</div>
+        <div class="logout-option" id="change-password-btn" tabindex="0">Şifreyi Değiştir</div>
         <div class="logout-option" id="logout-btn" tabindex="0">Çıkış Yap</div>
     </div>
+
+    <!-- Profil düzenleme modalı -->
+    <div id="profile-edit-modal" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:#000a; z-index:2000; align-items:center; justify-content:center;">
+        <div style="background:#232323; border-radius:12px; padding:32px 28px; min-width:320px; color:#fff; box-shadow:0 4px 32px #000a; display:flex; flex-direction:column; gap:18px; align-items:center; position:relative;">
+            <span style="position:absolute; right:18px; top:12px; cursor:pointer; font-size:1.3em;" id="close-profile-edit">&times;</span>
+            <h2 style="margin:0 0 12px 0;">Profili Düzenle</h2>
+            <label for="edit-username" style="width:100%; text-align:left;">Kullanıcı Adı</label>
+            <input id="edit-username" type="text" maxlength="20" style="width:100%; padding:10px; border-radius:6px; border:1.5px solid #444; background:#222; color:#fff; font-size:1em;" autocomplete="off">
+            <div id="profile-edit-info" style="color:#ffd700; font-size:0.98em; margin-bottom:8px;"></div>
+            <label for="edit-displayname" style="width:100%; text-align:left;">Görünen Ad (max 20 karakter)</label>
+            <input id="edit-displayname" type="text" maxlength="20" style="width:100%; padding:10px; border-radius:6px; border:1.5px solid #444; background:#222; color:#fff; font-size:1em;">
+            <div id="displayname-edit-info" style="color:#ffd700; font-size:0.98em; margin-bottom:8px;"></div>
+            <button id="save-profile-btn" style="padding:10px 0; border-radius:6px; border:none; background:#ffd700; color:#222; font-weight:bold; font-size:1.08em; cursor:pointer; width:100%;">Kaydet</button>
+        </div>
+    </div>
+
+    <!-- Şifre değiştirme modalı -->
+    <div id="password-modal" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:#000a; z-index:2000; align-items:center; justify-content:center;">
+        <div style="background:#232323; border-radius:12px; padding:32px 28px; min-width:320px; color:#fff; box-shadow:0 4px 32px #000a; display:flex; flex-direction:column; gap:14px; align-items:center; position:relative;">
+            <span style="position:absolute; right:18px; top:12px; cursor:pointer; font-size:1.3em;" id="close-password-modal">&times;</span>
+            <h2 style="margin:0 0 12px 0;">Şifreyi Değiştir</h2>
+            <input id="current-password" type="password" placeholder="Mevcut Şifre" style="width:100%; padding:10px; border-radius:6px; border:1.5px solid #444; background:#222; color:#fff;">
+            <input id="new-password" type="password" placeholder="Yeni Şifre" style="width:100%; padding:10px; border-radius:6px; border:1.5px solid #444; background:#222; color:#fff;">
+            <input id="new-password2" type="password" placeholder="Yeni Şifre Tekrar" style="width:100%; padding:10px; border-radius:6px; border:1.5px solid #444; background:#222; color:#fff;">
+            <div id="password-modal-info" style="color:#ffd700; font-size:0.98em; margin-bottom:8px;"></div>
+            <button id="save-password-btn" style="padding:10px 0; border-radius:6px; border:none; background:#ffd700; color:#222; font-weight:bold; font-size:1.08em; cursor:pointer; width:100%;">Şifreyi Değiştir</button>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // localStorage'da kullanıcı varsa otomatik giriş
@@ -102,10 +132,15 @@
             const userContent = document.getElementById('user-content');
             const errorDiv = document.getElementById('login-error');
             const registerErrorDiv = document.getElementById('register-error');
+            const editUsernameInput = document.getElementById('edit-username');
+            const registerUsernameInput = document.getElementById('register-username');
+            const loginUsernameInput = document.getElementById('login-username');
 
             function updateUserCard(data) {
-                document.getElementById('user-card-name').textContent = data.user.username;
-                document.getElementById('user-name').textContent = data.user.username;
+                const displayName = data.user.displayName || data.user.display_name || data.user.username;
+                document.getElementById('user-card-name').textContent = displayName;
+                document.getElementById('user-card-username').textContent = '@' + data.user.username;
+                document.getElementById('user-name').textContent = displayName;
                 document.getElementById('user-email').textContent = data.user.email || '';
                 // Avatarı: önce data.user.avatar varsa onu, yoksa default avatarı göster
                 let avatarSrc = data.user.avatar
@@ -198,6 +233,42 @@
                 }
             });
 
+            // Kullanıcı adı kutusunda büyük harf ve boşluk engelle (profil düzenle)
+            editUsernameInput.addEventListener('input', function() {
+                let val = editUsernameInput.value;
+                let newVal = val.toLowerCase().replace(/\s+/g, '');
+                if (val !== newVal) {
+                    const start = editUsernameInput.selectionStart;
+                    const end = editUsernameInput.selectionEnd;
+                    editUsernameInput.value = newVal;
+                    editUsernameInput.setSelectionRange(start - (val.length - newVal.length), end - (val.length - newVal.length));
+                }
+            });
+
+            // Kayıt olurken kullanıcı adı kutusunda SADECE boşluk engelle (büyük harf serbest)
+            registerUsernameInput.addEventListener('input', function() {
+                let val = registerUsernameInput.value;
+                let newVal = val.replace(/\s+/g, '');
+                if (val !== newVal) {
+                    const start = registerUsernameInput.selectionStart;
+                    const end = registerUsernameInput.selectionEnd;
+                    registerUsernameInput.value = newVal;
+                    registerUsernameInput.setSelectionRange(start - (val.length - newVal.length), end - (val.length - newVal.length));
+                }
+            });
+
+            // Giriş ekranında kullanıcı adı/e-posta kutusunda boşluk engelle
+            loginUsernameInput.addEventListener('input', function() {
+                let val = loginUsernameInput.value;
+                let newVal = val.replace(/\s+/g, '');
+                if (val !== newVal) {
+                    const start = loginUsernameInput.selectionStart;
+                    const end = loginUsernameInput.selectionEnd;
+                    loginUsernameInput.value = newVal;
+                    loginUsernameInput.setSelectionRange(start - (val.length - newVal.length), end - (val.length - newVal.length));
+                }
+            });
+
             // User-card'a sağ veya sol tıklayınca çıkış menüsünü aç/kapat
             const userCard = document.getElementById('user-card');
             const logoutMenu = document.getElementById('logout-menu');
@@ -268,6 +339,234 @@
                 hideLogoutMenu();
                 e.stopPropagation();
             });
+
+            const profileEditBtn = document.getElementById('profile-edit-btn');
+            const profileEditModal = document.getElementById('profile-edit-modal');
+            const closeProfileEdit = document.getElementById('close-profile-edit');
+            const profileEditInfo = document.getElementById('profile-edit-info');
+            const saveProfileBtn = document.getElementById('save-profile-btn');
+            const editDisplayNameInput = document.getElementById('edit-displayname');
+            const displayNameEditInfo = document.getElementById('displayname-edit-info');
+            const passwordModal = document.getElementById('password-modal');
+            const closePasswordModal = document.getElementById('close-password-modal');
+            const changePasswordBtn = document.getElementById('change-password-btn');
+            const savePasswordBtn = document.getElementById('save-password-btn');
+            const passwordModalInfo = document.getElementById('password-modal-info');
+            const currentPasswordInput = document.getElementById('current-password');
+            const newPasswordInput = document.getElementById('new-password');
+            const newPassword2Input = document.getElementById('new-password2');
+
+            // Profil düzenle aç
+            profileEditBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                profileEditModal.style.display = 'flex';
+                const user = JSON.parse(localStorage.getItem('pixelcar_user') || '{}');
+                editUsernameInput.value = user.username || '';
+                editDisplayNameInput.value = user.displayName || '';
+                profileEditInfo.textContent = '';
+                displayNameEditInfo.textContent = '';
+
+                // Butonun ilk durumu: değişiklik yoksa disable
+                function updateSaveProfileBtnState() {
+                    const currentUsername = editUsernameInput.value.trim();
+                    const currentDisplayName = editDisplayNameInput.value.trim();
+                    const usernameChanged = currentUsername !== (user.username || '');
+                    const displayNameChanged = currentDisplayName !== (user.displayName || '');
+                    // Kullanıcı adı alanı disable ise sadece görünen ad değişikliği kontrol edilir
+                    if (editUsernameInput.disabled && !displayNameChanged) {
+                        saveProfileBtn.disabled = true;
+                        saveProfileBtn.style.background = "#888";
+                        saveProfileBtn.style.color = "#ccc";
+                        saveProfileBtn.style.cursor = "not-allowed";
+                    } else if (!editUsernameInput.disabled && !usernameChanged && !displayNameChanged) {
+                        saveProfileBtn.disabled = true;
+                        saveProfileBtn.style.background = "#888";
+                        saveProfileBtn.style.color = "#ccc";
+                        saveProfileBtn.style.cursor = "not-allowed";
+                    } else {
+                        saveProfileBtn.disabled = false;
+                        saveProfileBtn.style.background = "#ffd700";
+                        saveProfileBtn.style.color = "#222";
+                        saveProfileBtn.style.cursor = "pointer";
+                    }
+                }
+
+                editUsernameInput.addEventListener('input', updateSaveProfileBtnState);
+                editDisplayNameInput.addEventListener('input', updateSaveProfileBtnState);
+
+                // Kullanıcı adı kalan süre
+                fetch(`http://localhost:3001/api/profile-edit-remaining?username=${encodeURIComponent(user.username)}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.remaining && data.remaining > 0) {
+                            const dakika = Math.floor((data.remaining % 3600) / 60);
+                            const saniye = data.remaining % 60;
+                            profileEditInfo.textContent = `Kullanıcı adını tekrar değiştirmek için kalan süre: ${dakika} dakika ${saniye} saniye`;
+                            editUsernameInput.disabled = true;
+                        } else {
+                            profileEditInfo.textContent = '';
+                            editUsernameInput.disabled = false;
+                        }
+                        updateSaveProfileBtnState();
+                    });
+                // Görünen ad kalan hak
+                fetch(`http://localhost:3001/api/displayname-edit-remaining?username=${encodeURIComponent(user.username)}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.remaining === 0) {
+                            displayNameEditInfo.textContent = '';
+                            editDisplayNameInput.disabled = false;
+                        } else if (data.remaining > 0) {
+                            displayNameEditInfo.textContent = `Bugün ${3 - data.remaining}/3 kez değiştirdiniz.`;
+                            editDisplayNameInput.disabled = false;
+                        }
+                        if (data.remaining <= 0 && data.count >= 3) {
+                            displayNameEditInfo.textContent = "Bugün görünen adınızı 3 kez değiştirdiniz. Yarın tekrar deneyebilirsiniz.";
+                            editDisplayNameInput.disabled = true;
+                        }
+                        updateSaveProfileBtnState();
+                    });
+            });
+            closeProfileEdit.addEventListener('click', function() {
+                profileEditModal.style.display = 'none';
+            });
+
+            // Profil kaydet
+            saveProfileBtn.addEventListener('click', async function() {
+                const user = JSON.parse(localStorage.getItem('pixelcar_user') || '{}');
+                const newUsername = editUsernameInput.value.trim();
+                const newDisplayName = editDisplayNameInput.value.trim();
+                if (!newUsername) {
+                    profileEditInfo.textContent = "Kullanıcı adı boş olamaz!";
+                    return;
+                }
+                if (newDisplayName.length > 15) {
+                    displayNameEditInfo.textContent = "Görünen ad en fazla 15 karakter olmalı!";
+                    return;
+                }
+                // Kullanıcı adı ve görünen ad değişikliği birlikte gönderiliyor
+                const res = await fetch('http://localhost:3001/api/change-profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ oldUsername: user.username, newUsername, newDisplayName })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    user.username = newUsername;
+                    user.displayName = newDisplayName;
+                    localStorage.setItem('pixelcar_user', JSON.stringify(user));
+                    profileEditModal.style.display = 'none';
+                    location.reload();
+                } else {
+                    if (data.usernameError) profileEditInfo.textContent = data.usernameError;
+                    if (data.displayNameError) displayNameEditInfo.textContent = data.displayNameError;
+                    if (!data.usernameError && !data.displayNameError) profileEditInfo.textContent = data.error || 'Bir hata oluştu.';
+                }
+            });
+
+            // Şifre değiştir modalı aç
+            changePasswordBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                passwordModal.style.display = 'flex';
+                passwordModalInfo.textContent = '';
+                currentPasswordInput.value = '';
+                newPasswordInput.value = '';
+                newPassword2Input.value = '';
+            });
+            closePasswordModal.addEventListener('click', function() {
+                passwordModal.style.display = 'none';
+            });
+
+            // Şifre değiştir
+            let lastPasswordChange = 0;
+            savePasswordBtn.addEventListener('click', async function() {
+                const now = Date.now();
+                if (now - lastPasswordChange < 10000) { // 10 saniye beklet
+                    passwordModalInfo.style.color = "#ffd700";
+                    passwordModalInfo.textContent = "Çok sık denediniz, lütfen biraz bekleyin.";
+                    return;
+                }
+                lastPasswordChange = now;
+                const user = JSON.parse(localStorage.getItem('pixelcar_user') || '{}');
+                const currentPassword = currentPasswordInput.value;
+                const newPassword = newPasswordInput.value;
+                const newPassword2 = newPassword2Input.value;
+                if (!currentPassword || !newPassword || !newPassword2) {
+                    passwordModalInfo.textContent = "Tüm alanları doldurun!";
+                    return;
+                }
+                if (newPassword !== newPassword2) {
+                    passwordModalInfo.textContent = "Yeni şifreler eşleşmiyor!";
+                    return;
+                }
+                const res = await fetch('http://localhost:3001/api/change-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: user.username, currentPassword, newPassword })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    passwordModalInfo.style.color = "#0f0";
+                    passwordModalInfo.textContent = "Şifre başarıyla değiştirildi!";
+                    setTimeout(() => { passwordModal.style.display = 'none'; }, 1200);
+                } else {
+                    passwordModalInfo.style.color = "#ffd700";
+                    passwordModalInfo.textContent = data.error || 'Bir hata oluştu.';
+                }
+            });
+
+            // Modal dışına tıklayınca kapat
+            window.addEventListener('click', function(e) {
+                if (e.target === profileEditModal) profileEditModal.style.display = 'none';
+                if (e.target === passwordModal) passwordModal.style.display = 'none';
+            });
+
+            const chatMessages = document.getElementById('chat-messages');
+            const chatForm = document.getElementById('chat-form');
+            const chatInput = document.getElementById('chat-input');
+
+            // Mesajları sunucudan çek ve ekrana bas
+            async function fetchAndRenderMessages() {
+                const res = await fetch('http://localhost:3001/api/chat-messages');
+                const data = await res.json();
+                chatMessages.innerHTML = '';
+                (data.messages || []).forEach(msg => {
+                    const avatarUrl = msg.avatar
+                        || `https://ui-avatars.com/api/?name=${encodeURIComponent(msg.tag || '')}&background=222&color=fff&size=32`;
+                    const msgDiv = document.createElement('div');
+                    msgDiv.className = 'chat-message-row';
+                    msgDiv.innerHTML = `
+                        <img src="${avatarUrl}" alt="tag" class="chat-avatar">
+                        <span class="chat-user"><b>${msg.username}</b> <span class="chat-tag">[${msg.tag || ''}]</span>:</span>
+                        <span class="chat-text">${msg.text}</span>
+                    `;
+                    chatMessages.appendChild(msgDiv);
+                });
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // Mesaj gönderme
+            chatForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const msg = chatInput.value.trim();
+                if (!msg) return;
+                const user = JSON.parse(localStorage.getItem('pixelcar_user') || '{}');
+                const tag = user.tag || '';
+                const username = user.username || 'Kullanıcı';
+                const avatar = user.avatar || '';
+                await fetch('http://localhost:3001/api/chat-message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, tag, avatar, text: msg })
+                });
+                chatInput.value = '';
+                fetchAndRenderMessages();
+            });
+
+            // Her 2 saniyede bir mesajları güncelle
+            setInterval(fetchAndRenderMessages, 2000);
+            // Sayfa açılır açılmaz mesajları getir
+            fetchAndRenderMessages();
         });
     </script>
 </body>
