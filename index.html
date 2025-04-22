@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Anasayfa - PixelCarProject</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="user-info-wrapper">
+            <div class="panel-navbar">
+                <span class="panel-navbar-title">PixelCarProject</span>
+            </div>
+            <div class="user-info" id="user-info">
+                <!-- Giriş yapmamış kullanıcı için giriş formu -->
+                <div class="login-card" id="login-card">
+                    <h2>Giriş Yap</h2>
+                    <form id="login-form">
+                        <input type="text" id="login-username" placeholder="Kullanıcı Adı" required>
+                        <input type="password" id="login-password" placeholder="Şifre" required>
+                        <button type="submit">Giriş Yap</button>
+                        <div id="login-error" style="color:red; margin-top:8px; display:none;"></div>
+                    </form>
+                </div>
+                <!-- Ayrıntılı kayıt formu (başta gizli) -->
+                <div class="register-card login-card" id="register-card" style="display:none;">
+                    <h2>Kayıt Ol</h2>
+                    <form id="register-form">
+                        <input type="text" id="register-username" placeholder="Kullanıcı Adı" required>
+                        <input type="email" id="register-email" placeholder="E-posta" required>
+                        <input type="password" id="register-password" placeholder="Şifre" required>
+                        <input type="password" id="register-password2" placeholder="Şifre Tekrar" required>
+                        <input type="text" id="register-tag" placeholder="Kart Etiketi (max 2 karakter)" maxlength="2" required>
+                        <button type="submit">Kayıt Ol</button>
+                        <div id="register-error" style="color:red; margin-top:8px; display:none;"></div>
+                    </form>
+                </div>
+                <!-- Giriş yapmış kullanıcı için gösterilecek alanlar (varsayılan olarak gizli) -->
+                <div class="user-content" id="user-content" style="display:none;">
+                    <nav class="side-menu">
+                        <a href="#">Galeri</a>
+                        <a href="#">Sanayi</a>
+                        <a href="#">Market</a>
+                        <a href="#">Pazar</a>
+                        <a href="#">Envanter</a>
+                    </nav>
+                    <div class="user-card" id="user-card">
+                        <img id="user-avatar" src="https://ui-avatars.com/api/?name=&background=222&color=fff&size=96" alt="Avatar" class="user-avatar">
+                        <div class="user-card-name" id="user-card-name">Talha</div>
+                    </div>
+                    <!-- Kullanıcı bilgileri burada gösterilecek -->
+                    <h2>Kullanıcı Bilgileri</h2>
+                    <p>Ad: <span id="user-name">Talha</span></p>
+                    <p>Email: <span id="user-email"></span></p>
+                </div>
+            </div>
+        </div>
+        <div class="chat-channel-wrapper">
+            <div class="panel-navbar">
+                <span class="panel-navbar-title">Sohbet</span>
+            </div>
+            <div class="chat-channel">
+                <div class="chat-header">
+                    Aktif Kullanıcılar Sohbet Kanalı
+                </div>
+                <div class="chat-messages" id="chat-messages">
+                    <!-- Sohbet mesajları burada listelenecek -->
+                    <div><strong>Ahmet:</strong> Merhaba!</div>
+                    <div><strong>Ayşe:</strong> Selamlar!</div>
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" id="chat-input" placeholder="Mesajınızı yazın...">
+                    <button id="send-btn">Gönder</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Çıkış menüsü (sayfanın en sonunda, user-card dışında) -->
+    <div id="logout-menu" style="display:none; position:fixed; background:#232323; border-radius:8px; box-shadow:0 4px 16px #0006; padding:0; z-index:1000;">
+        <div class="logout-option" id="logout-btn" tabindex="0">Çıkış Yap</div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // localStorage'da kullanıcı varsa otomatik giriş
+            const savedUser = localStorage.getItem('pixelcar_user');
+            if (savedUser) {
+                const userData = JSON.parse(savedUser);
+                showUserContent({ user: userData });
+                // Giriş ekranlarını tamamen gizle
+                document.getElementById('login-card').style.display = 'none';
+                document.getElementById('register-card').style.display = 'none';
+            } else {
+                document.getElementById('login-card').style.display = 'flex';
+                document.getElementById('user-content').style.display = 'none';
+            }
+
+            // Giriş formu submit işlemi
+            const loginForm = document.getElementById('login-form');
+            const registerCard = document.getElementById('register-card');
+            const registerForm = document.getElementById('register-form');
+            const loginCard = document.getElementById('login-card');
+            const userContent = document.getElementById('user-content');
+            const errorDiv = document.getElementById('login-error');
+            const registerErrorDiv = document.getElementById('register-error');
+
+            function updateUserCard(data) {
+                document.getElementById('user-card-name').textContent = data.user.username;
+                document.getElementById('user-name').textContent = data.user.username;
+                document.getElementById('user-email').textContent = data.user.email || '';
+                // Avatarı: önce data.user.avatar varsa onu, yoksa default avatarı göster
+                let avatarSrc = data.user.avatar
+                    || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.user.tag || '')}&background=222&color=fff&size=96`;
+                document.getElementById('user-avatar').src = avatarSrc;
+            }
+
+            function showUserContent(data) {
+                document.getElementById('login-card').style.display = 'none';
+                document.getElementById('register-card').style.display = 'none';
+                document.getElementById('user-content').style.display = 'block';
+                updateUserCard(data);
+            }
+
+            function hideUserContent() {
+                document.getElementById('user-content').style.display = 'none';
+                document.getElementById('login-card').style.display = 'flex';
+            }
+
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const username = document.getElementById('login-username').value;
+                const password = document.getElementById('login-password').value;
+                errorDiv.style.display = 'none';
+                try {
+                    const res = await fetch('http://localhost:3001/api/login-or-register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        // Giriş başarılı
+                        localStorage.setItem('pixelcar_user', JSON.stringify(data.user));
+                        showUserContent(data);
+                        document.getElementById('login-card').style.display = 'none';
+                        document.getElementById('register-card').style.display = 'none';
+                    } else if (data.needRegister) {
+                        // Kullanıcı yok, kayıt formunu göster
+                        loginCard.style.display = 'none';
+                        registerCard.style.display = 'block';
+                        document.getElementById('register-username').value = username;
+                    } else {
+                        errorDiv.textContent = data.error || 'Giriş başarısız';
+                        errorDiv.style.display = 'block';
+                    }
+                } catch (err) {
+                    errorDiv.textContent = 'Sunucuya bağlanılamadı';
+                    errorDiv.style.display = 'block';
+                }
+            });
+
+            registerForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                registerErrorDiv.style.display = 'none';
+                const username = document.getElementById('register-username').value;
+                const email = document.getElementById('register-email').value;
+                const password = document.getElementById('register-password').value;
+                const password2 = document.getElementById('register-password2').value;
+                const tag = document.getElementById('register-tag').value;
+                if (password !== password2) {
+                    registerErrorDiv.textContent = 'Şifreler eşleşmiyor!';
+                    registerErrorDiv.style.display = 'block';
+                    return;
+                }
+                if (!tag || tag.length > 2) {
+                    registerErrorDiv.textContent = 'Etiket en fazla 2 karakter olmalı!';
+                    registerErrorDiv.style.display = 'block';
+                    return;
+                }
+                try {
+                    const res = await fetch('http://localhost:3001/api/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password, email, tag })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        localStorage.setItem('pixelcar_user', JSON.stringify(data.user));
+                        showUserContent(data);
+                        document.getElementById('login-card').style.display = 'none';
+                        document.getElementById('register-card').style.display = 'none';
+                    } else {
+                        registerErrorDiv.textContent = data.error || 'Kayıt başarısız';
+                        registerErrorDiv.style.display = 'block';
+                    }
+                } catch (err) {
+                    registerErrorDiv.textContent = 'Sunucuya bağlanılamadı';
+                    registerErrorDiv.style.display = 'block';
+                }
+            });
+
+            // User-card'a sağ veya sol tıklayınca çıkış menüsünü aç/kapat
+            const userCard = document.getElementById('user-card');
+            const logoutMenu = document.getElementById('logout-menu');
+            let logoutMenuVisible = false;
+            let hideTimeout;
+
+            // Menü yumuşak gelsin ve mouse user-card'dan çıkınca kaybolsun
+            function showLogoutMenu(x, y) {
+                logoutMenu.style.display = 'block';
+                logoutMenu.style.opacity = '1';
+                logoutMenu.style.left = x + 'px';
+                logoutMenu.style.top = y + 'px';
+                logoutMenuVisible = true;
+                clearTimeout(hideTimeout);
+            }
+            function hideLogoutMenu() {
+                logoutMenu.style.opacity = '0';
+                logoutMenuVisible = false;
+                hideTimeout = setTimeout(() => {
+                    if (!logoutMenuVisible) logoutMenu.style.display = 'none';
+                }, 120);
+            }
+
+            userCard.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                showLogoutMenu(e.clientX, e.clientY);
+            });
+            userCard.addEventListener('click', function(e) {
+                showLogoutMenu(e.clientX, e.clientY);
+                e.stopPropagation();
+            });
+
+            // Mouse user-card veya menüden çıkınca menüyü gizle
+            userCard.addEventListener('mouseleave', function(e) {
+                // Eğer mouse logoutMenu'nun üstüne gidiyorsa küçülmeyi engelle
+                const toElement = e.relatedTarget || e.toElement;
+                if (!logoutMenu.contains(toElement)) {
+                    userCard.classList.remove('user-card-hover-fix');
+                    hideLogoutMenu();
+                } else {
+                    // Menüye geçerken hover efektini sabitle
+                    userCard.classList.add('user-card-hover-fix');
+                }
+            });
+            logoutMenu.addEventListener('mouseenter', function() {
+                clearTimeout(hideTimeout);
+                logoutMenuVisible = true;
+                userCard.classList.add('user-card-hover-fix');
+            });
+            logoutMenu.addEventListener('mouseleave', function(e) {
+                // Eğer mouse userCard'ın üstüne gidiyorsa küçülmeyi engelle
+                const toElement = e.relatedTarget || e.toElement;
+                if (!userCard.contains(toElement)) {
+                    userCard.classList.remove('user-card-hover-fix');
+                    hideLogoutMenu();
+                }
+            });
+
+            // Sayfanın başka yerine tıklanınca çıkış menüsünü kapat
+            document.addEventListener('click', function() {
+                hideLogoutMenu();
+            });
+
+            document.getElementById('logout-btn').addEventListener('click', function(e) {
+                localStorage.removeItem('pixelcar_user');
+                hideUserContent();
+                document.getElementById('login-card').style.display = 'flex';
+                hideLogoutMenu();
+                e.stopPropagation();
+            });
+        });
+    </script>
+</body>
+</html>

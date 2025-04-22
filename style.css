@@ -1,0 +1,275 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #111111;
+}
+.panel-navbar {
+    width: 100%;
+    background: #111;
+    color: #fff;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+.panel-navbar-title {
+    font-size: 1.15em;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+.container {
+    display: flex;
+    height: 100vh;
+    margin-top: 0;
+}
+.user-info-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 2;
+    background: #222;
+    position: relative;
+    justify-content: flex-start;
+}
+.user-info {
+    background: transparent;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2em;
+    position: relative;
+    padding-top: 48px;
+    width: 100%;
+    flex: 1;
+}
+.side-menu {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 32px;
+    gap: 10px;
+    margin-top: 0;
+    padding-top: 0;
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+}
+.side-menu a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.08em;
+    font-weight: 500;
+    padding: 8px 18px;
+    border-radius: 8px;
+    transition: background 0.18s, transform 0.18s, color 0.18s;
+    opacity: 0.92;
+}
+.side-menu a:hover {
+    background: #333;
+    color: #ffd700;
+    transform: scale(1.08);
+    opacity: 1;
+}
+.user-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #292929;
+    border-radius: 18px;
+    padding: 28px 32px 20px 32px;
+    margin-bottom: 32px;
+    box-shadow: 0 2px 16px 0 rgba(0,0,0,0.08);
+    transition: transform 0.18s cubic-bezier(.4,2,.6,1), box-shadow 0.18s;
+    cursor: pointer;
+}
+.user-card:hover,
+.user-card.user-card-hover-fix {
+    transform: scale(1.04);
+    box-shadow: 0 4px 20px 0 rgba(0,0,0,0.13);
+}
+.user-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    margin-bottom: 12px;
+    border: 3px solid #444;
+    object-fit: cover;
+}
+.user-card-name {
+    font-size: 1.25em;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: #fff;
+    text-align: center;
+}
+.chat-channel-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    height: 100%;
+}
+.chat-channel {
+    flex: 1;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    border-left: 2px solid #ddd;
+    height: 100%;
+}
+.chat-header {
+    padding: 16px;
+    background: #eee;
+    border-bottom: 1px solid #ddd;
+    font-weight: bold;
+}
+.chat-messages {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+}
+.chat-input-area {
+    display: flex;
+    border-top: 1px solid #ddd;
+    padding: 8px;
+    background: #fafafa;
+}
+.chat-input-area input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.chat-input-area button {
+    margin-left: 8px;
+    padding: 8px 16px;
+    border: none;
+    background: #222;
+    color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.login-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #292929;
+    border-radius: 18px;
+    padding: 36px 38px 28px 38px;
+    margin-bottom: 32px;
+    box-shadow: 0 2px 16px 0 rgba(0,0,0,0.10);
+    width: 320px;
+    gap: 18px;
+}
+.login-card h2 {
+    color: #fff;
+    margin-bottom: 18px;
+    font-size: 1.3em;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+.login-card form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 14px;
+}
+.login-card input[type="text"],
+.login-card input[type="password"],
+.login-card input[type="email"],
+.register-card input[type="text"],
+.register-card input[type="password"],
+.register-card input[type="email"] {
+    padding: 10px 14px;
+    border-radius: 6px;
+    border: 1.5px solid #444;
+    background: #222;
+    color: #fff;
+    font-size: 1em;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.login-card input[type="text"]:focus,
+.login-card input[type="password"]:focus,
+.login-card input[type="email"]:focus,
+.register-card input[type="text"]:focus,
+.register-card input[type="password"]:focus,
+.register-card input[type="email"]:focus {
+    border: 1.5px solid #ffd700;
+}
+.login-card input,
+.register-card input {
+    width: 100%;
+    padding: 10px;
+    margin: 0;
+    box-sizing: border-box;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    background: #222;
+    color: #fff;
+}
+.login-card button[type="submit"] {
+    padding: 10px 0;
+    border-radius: 6px;
+    border: none;
+    background: #ffd700;
+    color: #222;
+    font-weight: bold;
+    font-size: 1.08em;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.18s, color 0.18s;
+}
+.login-card button[type="submit"]:hover {
+    background: #fff;
+    color: #111;
+}
+#logout-menu {
+    min-width: 110px;
+    background: #232323;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px #0006;
+    padding: 0;
+    z-index: 1000;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.18s cubic-bezier(.4,2,.6,1);
+    position: fixed;
+    animation: fadeInMenu 0.18s;
+}
+#logout-menu button {
+    display: none;
+}
+#logout-menu .logout-option {
+    display: block;
+    width: 100%;
+    min-width: 110px;
+    box-sizing: border-box;
+    padding: 10px 18px;
+    border: none;
+    background: transparent;
+    color: #fff;
+    font-size: 1em;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background 0.15s, color 0.15s;
+    outline: none;
+}
+#logout-menu .logout-option:hover,
+#logout-menu .logout-option:focus {
+    background: #ffd700;
+    color: #222;
+}
+@keyframes fadeInMenu {
+    from { opacity: 0; transform: scale(0.95);}
+    to   { opacity: 1; transform: scale(1);}
+}
