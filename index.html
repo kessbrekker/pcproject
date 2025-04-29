@@ -92,6 +92,9 @@
             <label for="edit-displayname" style="width:100%; text-align:left;">Görünen Ad (max 20 karakter)</label>
             <input id="edit-displayname" type="text" maxlength="20" style="width:100%; padding:10px; border-radius:6px; border:1.5px solid #444; background:#222; color:#fff; font-size:1em;">
             <div id="displayname-edit-info" style="color:#ffd700; font-size:0.98em; margin-bottom:8px;"></div>
+            <label for="edit-tag" style="width:100%; text-align:left;">Kart Etiketi (max 2 harf)</label>
+            <input id="edit-tag" type="text" maxlength="2" style="width:100%; padding:10px; border-radius:6px; border:1.5px solid #444; background:#222; color:#fff; font-size:1em; text-transform:uppercase;" autocomplete="off">
+            <div id="tag-edit-info" style="color:#ffd700; font-size:0.98em; margin-bottom:8px;"></div>
             <button id="save-profile-btn" style="padding:10px 0; border-radius:6px; border:none; background:#ffd700; color:#222; font-weight:bold; font-size:1.08em; cursor:pointer; width:100%;">Kaydet</button>
         </div>
     </div>
@@ -135,6 +138,8 @@
             const editUsernameInput = document.getElementById('edit-username');
             const registerUsernameInput = document.getElementById('register-username');
             const loginUsernameInput = document.getElementById('login-username');
+            const tagInput = document.getElementById('edit-tag');
+            const tagEditInfo = document.getElementById('tag-edit-info');
 
             function updateUserCard(data) {
                 const displayName = data.user.displayName || data.user.display_name || data.user.username;
@@ -236,7 +241,8 @@
             // Kullanıcı adı kutusunda büyük harf ve boşluk engelle (profil düzenle)
             editUsernameInput.addEventListener('input', function() {
                 let val = editUsernameInput.value;
-                let newVal = val.toLowerCase().replace(/\s+/g, '');
+                // Sadece İngilizce harf ve rakam, küçük harfe çevir, boşluk yok
+                let newVal = val.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
                 if (val !== newVal) {
                     const start = editUsernameInput.selectionStart;
                     const end = editUsernameInput.selectionEnd;
@@ -245,10 +251,10 @@
                 }
             });
 
-            // Kayıt olurken kullanıcı adı kutusunda SADECE boşluk engelle (büyük harf serbest)
+            // Kayıt olurken kullanıcı adı kutusunda SADECE İngilizce harf ve büyük harf serbest, boşluk yok
             registerUsernameInput.addEventListener('input', function() {
                 let val = registerUsernameInput.value;
-                let newVal = val.replace(/\s+/g, '');
+                let newVal = val.replace(/[^a-zA-Z]/g, '');
                 if (val !== newVal) {
                     const start = registerUsernameInput.selectionStart;
                     const end = registerUsernameInput.selectionEnd;
@@ -257,15 +263,28 @@
                 }
             });
 
-            // Giriş ekranında kullanıcı adı/e-posta kutusunda boşluk engelle
+            // Giriş ekranında kullanıcı adı/e-posta kutusunda boşluk ve Türkçe karakter engelle
             loginUsernameInput.addEventListener('input', function() {
                 let val = loginUsernameInput.value;
-                let newVal = val.replace(/\s+/g, '');
+                let newVal = val.replace(/[^a-zA-Z0-9@.]/g, '');
                 if (val !== newVal) {
                     const start = loginUsernameInput.selectionStart;
                     const end = loginUsernameInput.selectionEnd;
                     loginUsernameInput.value = newVal;
                     loginUsernameInput.setSelectionRange(start - (val.length - newVal.length), end - (val.length - newVal.length));
+                }
+            });
+
+            // Tag input: sadece büyük harf ve rakam, boşluk yok, max 2 karakter
+            tagInput.addEventListener('input', function() {
+                let val = tagInput.value;
+                // Sadece İngilizce harf ve rakam, büyük harfe çevir, max 2 karakter
+                let newVal = val.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 2);
+                if (val !== newVal) {
+                    const start = tagInput.selectionStart;
+                    const end = tagInput.selectionEnd;
+                    tagInput.value = newVal;
+                    tagInput.setSelectionRange(start - (val.length - newVal.length), end - (val.length - newVal.length));
                 }
             });
 
@@ -363,22 +382,26 @@
                 const user = JSON.parse(localStorage.getItem('pixelcar_user') || '{}');
                 editUsernameInput.value = user.username || '';
                 editDisplayNameInput.value = user.displayName || '';
+                tagInput.value = user.tag || '';
                 profileEditInfo.textContent = '';
                 displayNameEditInfo.textContent = '';
+                tagEditInfo.textContent = '';
 
                 // Butonun ilk durumu: değişiklik yoksa disable
                 function updateSaveProfileBtnState() {
                     const currentUsername = editUsernameInput.value.trim();
                     const currentDisplayName = editDisplayNameInput.value.trim();
+                    const currentTag = tagInput.value.trim();
                     const usernameChanged = currentUsername !== (user.username || '');
                     const displayNameChanged = currentDisplayName !== (user.displayName || '');
-                    // Kullanıcı adı alanı disable ise sadece görünen ad değişikliği kontrol edilir
-                    if (editUsernameInput.disabled && !displayNameChanged) {
+                    const tagChanged = currentTag !== (user.tag || '');
+                    // Kullanıcı adı alanı disable ise sadece görünen ad ve tag değişikliği kontrol edilir
+                    if (editUsernameInput.disabled && !displayNameChanged && !tagChanged) {
                         saveProfileBtn.disabled = true;
                         saveProfileBtn.style.background = "#888";
                         saveProfileBtn.style.color = "#ccc";
                         saveProfileBtn.style.cursor = "not-allowed";
-                    } else if (!editUsernameInput.disabled && !usernameChanged && !displayNameChanged) {
+                    } else if (!editUsernameInput.disabled && !usernameChanged && !displayNameChanged && !tagChanged) {
                         saveProfileBtn.disabled = true;
                         saveProfileBtn.style.background = "#888";
                         saveProfileBtn.style.color = "#ccc";
@@ -393,6 +416,7 @@
 
                 editUsernameInput.addEventListener('input', updateSaveProfileBtnState);
                 editDisplayNameInput.addEventListener('input', updateSaveProfileBtnState);
+                tagInput.addEventListener('input', updateSaveProfileBtnState);
 
                 // Kullanıcı adı kalan süre
                 fetch(`http://localhost:3001/api/profile-edit-remaining?username=${encodeURIComponent(user.username)}`)
@@ -426,6 +450,23 @@
                         }
                         updateSaveProfileBtnState();
                     });
+                // Tag kalan hak
+                fetch(`http://localhost:3001/api/tag-edit-remaining?username=${encodeURIComponent(user.username)}`)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.remaining === 0) {
+                            tagEditInfo.textContent = '';
+                            tagInput.disabled = false;
+                        } else if (data.remaining > 0) {
+                            tagEditInfo.textContent = `Bugün ${3 - data.remaining}/3 kez değiştirdiniz.`;
+                            tagInput.disabled = false;
+                        }
+                        if (data.remaining <= 0 && data.count >= 3) {
+                            tagEditInfo.textContent = "Bugün kart etiketinizi 3 kez değiştirdiniz. Yarın tekrar deneyebilirsiniz.";
+                            tagInput.disabled = true;
+                        }
+                        updateSaveProfileBtnState();
+                    });
             });
             closeProfileEdit.addEventListener('click', function() {
                 profileEditModal.style.display = 'none';
@@ -436,6 +477,7 @@
                 const user = JSON.parse(localStorage.getItem('pixelcar_user') || '{}');
                 const newUsername = editUsernameInput.value.trim();
                 const newDisplayName = editDisplayNameInput.value.trim();
+                const newTag = tagInput.value.trim();
                 if (!newUsername) {
                     profileEditInfo.textContent = "Kullanıcı adı boş olamaz!";
                     return;
@@ -444,23 +486,29 @@
                     displayNameEditInfo.textContent = "Görünen ad en fazla 15 karakter olmalı!";
                     return;
                 }
-                // Kullanıcı adı ve görünen ad değişikliği birlikte gönderiliyor
+                if (newTag.length > 2) {
+                    tagEditInfo.textContent = "Etiket en fazla 2 harf olmalı!";
+                    return;
+                }
+                // Kullanıcı adı, görünen ad ve tag değişikliği birlikte gönderiliyor
                 const res = await fetch('http://localhost:3001/api/change-profile', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ oldUsername: user.username, newUsername, newDisplayName })
+                    body: JSON.stringify({ oldUsername: user.username, newUsername, newDisplayName, newTag })
                 });
                 const data = await res.json();
                 if (res.ok) {
                     user.username = newUsername;
                     user.displayName = newDisplayName;
+                    user.tag = newTag;
                     localStorage.setItem('pixelcar_user', JSON.stringify(user));
                     profileEditModal.style.display = 'none';
                     location.reload();
                 } else {
                     if (data.usernameError) profileEditInfo.textContent = data.usernameError;
                     if (data.displayNameError) displayNameEditInfo.textContent = data.displayNameError;
-                    if (!data.usernameError && !data.displayNameError) profileEditInfo.textContent = data.error || 'Bir hata oluştu.';
+                    if (data.tagError) tagEditInfo.textContent = data.tagError;
+                    if (!data.usernameError && !data.displayNameError && !data.tagError) profileEditInfo.textContent = data.error || 'Bir hata oluştu.';
                 }
             });
 
@@ -530,18 +578,46 @@
                 const res = await fetch('http://localhost:3001/api/chat-messages');
                 const data = await res.json();
                 chatMessages.innerHTML = '';
-                (data.messages || []).forEach(msg => {
+                // Kullanıcı bilgisi (yetki kontrolü için)
+                const user = JSON.parse(localStorage.getItem('pixelcar_user') || '{}');
+                const isMod = user && user.authority === 2;
+                (data.messages || []).forEach((msg, idx) => {
                     const avatarUrl = msg.avatar
                         || `https://ui-avatars.com/api/?name=${encodeURIComponent(msg.tag || '')}&background=222&color=fff&size=32`;
                     const msgDiv = document.createElement('div');
                     msgDiv.className = 'chat-message-row';
                     msgDiv.innerHTML = `
-                        <img src="${avatarUrl}" alt="tag" class="chat-avatar">
-                        <span class="chat-user"><b>${msg.username}</b> <span class="chat-tag">[${msg.tag || ''}]</span>:</span>
+                        <img src="${avatarUrl}" alt="avatar" class="chat-avatar">
+                        <span class="chat-user"><b>${msg.username}</b>:</span>
                         <span class="chat-text">${msg.text}</span>
+                        ${
+                            isMod
+                                ? `<button class="chat-delete-btn" data-msg-idx="${idx}" style="margin-left:8px; background:#c00; color:#fff; border:none; border-radius:4px; padding:2px 8px; cursor:pointer;">Sil</button>`
+                                : ''
+                        }
                     `;
                     chatMessages.appendChild(msgDiv);
                 });
+
+                // Silme butonlarına event ekle (sadece yetkili kullanıcılar için)
+                if (isMod) {
+                    document.querySelectorAll('.chat-delete-btn').forEach(btn => {
+                        btn.addEventListener('click', async function(e) {
+                            const idx = parseInt(btn.getAttribute('data-msg-idx'));
+                            // Mesajı silmek için API çağrısı
+                            const res = await fetch('http://localhost:3001/api/delete-chat-message', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ idx, username: user.username })
+                            });
+                            if (res.ok) {
+                                fetchAndRenderMessages();
+                            } else {
+                                alert('Mesaj silinemedi.');
+                            }
+                        });
+                    });
+                }
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }
 

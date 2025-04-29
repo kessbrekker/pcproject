@@ -56,9 +56,29 @@ db.serialize(() => {
     db.run("ALTER TABLE users ADD COLUMN displayname_change_count INTEGER", () => {});
 });
 
+// Kullanıcı tablosuna tag_changed_at ve tag_change_count alanı ekle (varsa eklemez)
+db.serialize(() => {
+    db.run("ALTER TABLE users ADD COLUMN tag_changed_at INTEGER", () => {});
+    db.run("ALTER TABLE users ADD COLUMN tag_change_count INTEGER", () => {});
+});
+
+// Yardımcı fonksiyon: Sadece İngilizce harflerden oluşuyor mu?
+function isEnglishLetters(str) {
+    return /^[a-zA-Z]+$/.test(str);
+}
+
+// Yardımcı fonksiyon: Sadece İngilizce harf ve rakamlardan oluşuyor mu?
+function isEnglishLettersOrDigits(str) {
+    return /^[a-zA-Z0-9]+$/.test(str);
+}
+
 // Giriş veya kayıt kontrolü
 app.post('/api/login-or-register', (req, res) => {
     const { username, password } = req.body;
+    // Sadece İngilizce harf, rakam ve @ . kontrolü (boşluk ve özel karakter de engellenir)
+    if (username && !/^[a-zA-Z0-9@.]+$/.test(username)) {
+        return res.status(400).json({ error: 'Kullanıcı adı veya e-posta sadece İngilizce harf, rakam ve @ . içerebilir.' });
+    }
     // username alanı e-posta da olabilir
     db.get(
         'SELECT * FROM users WHERE LOWER(username) = ? OR LOWER(email) = ?',
@@ -84,6 +104,13 @@ app.post('/api/register', (req, res) => {
     }
     if (!username || username.length > 20) {
         return res.status(400).json({ error: 'Kullanıcı adı en fazla 20 karakter olmalı!' });
+    }
+    // Sadece İngilizce harf ve rakam kontrolü (kullanıcı adı ve tag)
+    if (!isEnglishLettersOrDigits(username)) {
+        return res.status(400).json({ error: 'Kullanıcı adı sadece İngilizce harf ve rakamlardan oluşabilir.' });
+    }
+    if (!isEnglishLettersOrDigits(tag)) {
+        return res.status(400).json({ error: 'Etiket sadece İngilizce harf ve rakamlardan oluşabilir.' });
     }
     // Kullanıcı adı küçük harfe çevrilerek kaydedilecek, görünen ad orijinal haliyle tutulacak
     const originalDisplayName = username;
@@ -125,6 +152,10 @@ app.post('/api/upload-avatar', (req, res) => {
 app.post('/api/change-username', (req, res) => {
     let { oldUsername, newUsername } = req.body;
     if (!oldUsername || !newUsername) return res.status(400).json({ error: 'Eksik veri' });
+    // Sadece İngilizce harf ve rakam kontrolü
+    if (!isEnglishLettersOrDigits(newUsername)) {
+        return res.status(400).json({ error: 'Kullanıcı adı sadece İngilizce harf ve rakamlardan oluşabilir.' });
+    }
     // Yeni kullanıcı adını küçük harfe çevirerek işle
     const newUsernameLower = newUsername.toLowerCase();
     db.get('SELECT * FROM users WHERE LOWER(username) = ?', [oldUsername.toLowerCase()], (err, user) => {
@@ -195,15 +226,20 @@ app.post('/api/change-password', (req, res) => {
     });
 });
 
-// Kullanıcı adı ve görünen ad değiştirme (kullanıcı adı: 1dk, görünen ad: günde 3 kez)
+// Kullanıcı adı ve görünen ad ve tag değiştirme (kullanıcı adı: 1dk, görünen ad: günde 3, tag: günde 3)
 app.post('/api/change-profile', (req, res) => {
-    let { oldUsername, newUsername, newDisplayName } = req.body;
+    let { oldUsername, newUsername, newDisplayName, newTag } = req.body;
     if (!oldUsername || !newUsername) return res.status(400).json({ error: 'Eksik veri' });
     if (newUsername.length > 20) return res.status(400).json({ usernameError: 'Kullanıcı adı en fazla 20 karakter olmalı!' });
+    // Sadece İngilizce harf ve rakam kontrolü
+    if (!isEnglishLettersOrDigits(newUsername)) return res.status(400).json({ usernameError: 'Kullanıcı adı sadece İngilizce harf ve rakamlardan oluşabilir.' });
+    if (newTag && newTag.length > 2) return res.status(400).json({ tagError: 'Etiket en fazla 2 harf olmalı!' });
+    if (newTag && /\s/.test(newTag)) return res.status(400).json({ tagError: 'Etiket boşluk içeremez!' });
+    if (newTag && !isEnglishLettersOrDigits(newTag)) return res.status(400).json({ tagError: 'Etiket sadece İngilizce harf ve rakamlardan oluşabilir.' });
+    if (newTag) newTag = newTag.toUpperCase();
+
     const newUsernameLower = newUsername.toLowerCase();
-    // oldUsername zaten küçük harfli olabilir, ama veritabanında küçük harfli tutuluyor!
     db.get('SELECT * FROM users WHERE username = ?', [oldUsername], (err, user) => {
-        // Eğer bulamazsa bir de küçük harfli olarak tekrar dene (eski kullanıcıdan localStorage'da büyük harfli kalmış olabilir)
         if ((!user || err) && oldUsername !== oldUsername.toLowerCase()) {
             db.get('SELECT * FROM users WHERE username = ?', [oldUsername.toLowerCase()], (err2, user2) => {
                 if (err2 || !user2) return res.status(400).json({ error: 'Kullanıcı bulunamadı.' });
@@ -248,8 +284,28 @@ app.post('/api/change-profile', (req, res) => {
                 }
             }
 
-            if (usernameError || displayNameError) {
-                return res.status(400).json({ usernameError, displayNameError });
+            // Tag değiştirme kontrolü (günde 3 kez)
+            const tagChanged = (typeof newTag === "string" && newTag !== (user.tag || ""));
+            const tagDay = 60 * 60 * 24;
+            const lastTagChanged = user.tag_changed_at || 0;
+            let tagCount = user.tag_change_count || 0;
+            let tagError = null;
+            if (tagChanged) {
+                if (newTag.length > 2) {
+                    tagError = "Etiket en fazla 2 harf olmalı!";
+                } else if (/\s/.test(newTag)) {
+                    tagError = "Etiket boşluk içeremez!";
+                } else if (now - lastTagChanged > tagDay) {
+                    tagCount = 0;
+                }
+                if (tagCount >= 3 && (now - lastTagChanged < tagDay)) {
+                    const kalan = tagDay - (now - lastTagChanged);
+                    tagError = `Kart etiketi bugün 3 kez değiştirildi. Lütfen ${Math.ceil(kalan/3600)} saat sonra tekrar deneyin.`;
+                }
+            }
+
+            if (usernameError || displayNameError || tagError) {
+                return res.status(400).json({ usernameError, displayNameError, tagError });
             }
 
             // Kullanıcı adı çakışma kontrolü
@@ -257,17 +313,35 @@ app.post('/api/change-profile', (req, res) => {
                 db.get('SELECT * FROM users WHERE LOWER(username) = ?', [newUsernameLower], (err2, exists) => {
                     if (exists) return res.status(400).json({ usernameError: 'Bu kullanıcı adı zaten alınmış.' });
                     // Güncelle
-                    db.run('UPDATE users SET username = ?, username_changed_at = ?, display_name = ?, displayname_changed_at = ?, displayname_change_count = ? WHERE id = ?',
-                        [newUsernameLower, usernameChanged ? now : user.username_changed_at, newDisplayName, displayNameChanged ? now : user.displayname_changed_at, displayNameChanged ? displayNameCount + 1 : displayNameCount, user.id],
+                    db.run('UPDATE users SET username = ?, username_changed_at = ?, display_name = ?, displayname_changed_at = ?, displayname_change_count = ?, tag = ?, tag_changed_at = ?, tag_change_count = ? WHERE id = ?',
+                        [
+                            newUsernameLower,
+                            usernameChanged ? now : user.username_changed_at,
+                            newDisplayName,
+                            displayNameChanged ? now : user.displayname_changed_at,
+                            displayNameChanged ? displayNameCount + 1 : displayNameCount,
+                            tagChanged ? newTag : user.tag,
+                            tagChanged ? now : user.tag_changed_at,
+                            tagChanged ? tagCount + 1 : tagCount,
+                            user.id
+                        ],
                         function(err3) {
                             if (err3) return res.status(400).json({ error: 'Profil güncellenemedi.' });
                             res.json({ ok: true });
                         });
                 });
             } else {
-                // Sadece görünen ad değişiyorsa
-                db.run('UPDATE users SET display_name = ?, displayname_changed_at = ?, displayname_change_count = ? WHERE id = ?',
-                    [newDisplayName, displayNameChanged ? now : user.displayname_changed_at, displayNameChanged ? displayNameCount + 1 : displayNameCount, user.id],
+                // Sadece görünen ad veya tag değişiyorsa
+                db.run('UPDATE users SET display_name = ?, displayname_changed_at = ?, displayname_change_count = ?, tag = ?, tag_changed_at = ?, tag_change_count = ? WHERE id = ?',
+                    [
+                        newDisplayName,
+                        displayNameChanged ? now : user.displayname_changed_at,
+                        displayNameChanged ? displayNameCount + 1 : displayNameCount,
+                        tagChanged ? newTag : user.tag,
+                        tagChanged ? now : user.tag_changed_at,
+                        tagChanged ? tagCount + 1 : tagCount,
+                        user.id
+                    ],
                     function(err3) {
                         if (err3) return res.status(400).json({ error: 'Profil güncellenemedi.' });
                         res.json({ ok: true });
@@ -293,12 +367,31 @@ app.get('/api/displayname-edit-remaining', (req, res) => {
     });
 });
 
+// Tag değiştirme kalan hak endpoint'i (günde 3 kez)
+app.get('/api/tag-edit-remaining', (req, res) => {
+    const username = req.query.username;
+    if (!username) return res.json({ remaining: 0, count: 0 });
+    db.get('SELECT * FROM users WHERE LOWER(username) = ?', [username.toLowerCase()], (err, user) => {
+        if (!user) return res.json({ remaining: 0, count: 0 });
+        const now = Math.floor(Date.now() / 1000);
+        const lastChanged = user.tag_changed_at || 0;
+        const tagDay = 60 * 60 * 24;
+        let count = user.tag_change_count || 0;
+        if (now - lastChanged > tagDay) count = 0;
+        const kalan = Math.max(0, 3 - count);
+        res.json({ remaining: kalan, count });
+    });
+});
+
 // Basit bellek içi mesaj listesi (sunucu yeniden başlatılırsa silinir)
 let chatMessages = [];
 
 // Sohbet mesajı ekleme endpoint'i
 app.post('/api/chat-message', (req, res) => {
-    const { username, tag, avatar, text } = req.body;
+    let { username, tag, avatar, text } = req.body;
+    // Sohbet için kullanıcı adı ve tag sadece İngilizce harf ve rakamlardan oluşmalı
+    if (!isEnglishLettersOrDigits(username)) return res.status(400).json({ error: 'Kullanıcı adı sadece İngilizce harf ve rakamlardan oluşabilir.' });
+    if (tag && !isEnglishLettersOrDigits(tag)) return res.status(400).json({ error: 'Etiket sadece İngilizce harf ve rakamlardan oluşabilir.' });
     if (!username || !text) return res.status(400).json({ error: 'Eksik veri' });
     const msg = {
         username,
@@ -316,6 +409,19 @@ app.post('/api/chat-message', (req, res) => {
 // Sohbet mesajlarını çekme endpoint'i
 app.get('/api/chat-messages', (req, res) => {
     res.json({ messages: chatMessages });
+});
+
+// Sohbet mesajı silme endpoint'i (sadece authority 2 için)
+app.post('/api/delete-chat-message', (req, res) => {
+    const { idx, username } = req.body;
+    if (typeof idx !== 'number' || !username) return res.status(400).json({ error: 'Eksik veri' });
+    db.get('SELECT authority FROM users WHERE LOWER(username) = ?', [username.toLowerCase()], (err, user) => {
+        if (err || !user) return res.status(403).json({ error: 'Yetki yok' });
+        if (user.authority !== 2) return res.status(403).json({ error: 'Yetki yok' });
+        if (idx < 0 || idx >= chatMessages.length) return res.status(400).json({ error: 'Geçersiz mesaj' });
+        chatMessages.splice(idx, 1);
+        res.json({ ok: true });
+    });
 });
 
 // Basit test endpoint'i
