@@ -425,10 +425,13 @@ app.post('/api/delete-chat-message', (req, res) => {
     });
 });
 
+// Statik dosyaları sunmak için ekleyin (index.html ve diğer dosyalar için)
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Basit test endpoint'i
-app.get('/', (req, res) => {
-    res.send('PixelCarProject API (SQLite) çalışıyor!');
-});
+// app.get('/', (req, res) => {
+//     res.send('PixelCarProject API (SQLite) çalışıyor!');
+// });
 
 const PORT = 3001;
 app.listen(PORT, () => {
