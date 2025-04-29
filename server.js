@@ -8,6 +8,9 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json({ limit: '5mb' }));
 
+// Statik dosyaları sunmak için en üste taşıyın!
+app.use(express.static(path.join(__dirname, 'public')));
+
 // SQLite bağlantısı ve tablo oluşturma
 const db = new sqlite3.Database('veri.db');
 db.serialize(() => {
@@ -425,8 +428,9 @@ app.post('/api/delete-chat-message', (req, res) => {
     });
 });
 
-// Statik dosyaları sunmak için ekleyin (index.html ve diğer dosyalar için)
-app.use(express.static(path.join(__dirname, 'public')));
+app.get('/test', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // Basit test endpoint'i
 // app.get('/', (req, res) => {
