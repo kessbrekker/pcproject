@@ -171,7 +171,7 @@
                 const password = document.getElementById('login-password').value;
                 errorDiv.style.display = 'none';
                 try {
-                    const res = await fetch('http://localhost:3001/api/login-or-register', {
+                    const res = await fetch('/api/login-or-register', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ username, password })
@@ -217,7 +217,7 @@
                     return;
                 }
                 try {
-                    const res = await fetch('http://localhost:3001/api/register', {
+                    const res = await fetch('/api/register', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ username, password, email, tag })
@@ -419,7 +419,7 @@
                 tagInput.addEventListener('input', updateSaveProfileBtnState);
 
                 // Kullanıcı adı kalan süre
-                fetch(`http://localhost:3001/api/profile-edit-remaining?username=${encodeURIComponent(user.username)}`)
+                fetch(`/api/profile-edit-remaining?username=${encodeURIComponent(user.username)}`)
                     .then(r => r.json())
                     .then(data => {
                         if (data.remaining && data.remaining > 0) {
@@ -434,7 +434,7 @@
                         updateSaveProfileBtnState();
                     });
                 // Görünen ad kalan hak
-                fetch(`http://localhost:3001/api/displayname-edit-remaining?username=${encodeURIComponent(user.username)}`)
+                fetch(`/api/displayname-edit-remaining?username=${encodeURIComponent(user.username)}`)
                     .then(r => r.json())
                     .then(data => {
                         if (data.remaining === 0) {
@@ -451,7 +451,7 @@
                         updateSaveProfileBtnState();
                     });
                 // Tag kalan hak
-                fetch(`http://localhost:3001/api/tag-edit-remaining?username=${encodeURIComponent(user.username)}`)
+                fetch(`/api/tag-edit-remaining?username=${encodeURIComponent(user.username)}`)
                     .then(r => r.json())
                     .then(data => {
                         if (data.remaining === 0) {
@@ -491,7 +491,7 @@
                     return;
                 }
                 // Kullanıcı adı, görünen ad ve tag değişikliği birlikte gönderiliyor
-                const res = await fetch('http://localhost:3001/api/change-profile', {
+                const res = await fetch('/api/change-profile', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ oldUsername: user.username, newUsername, newDisplayName, newTag })
@@ -547,7 +547,7 @@
                     passwordModalInfo.textContent = "Yeni şifreler eşleşmiyor!";
                     return;
                 }
-                const res = await fetch('http://localhost:3001/api/change-password', {
+                const res = await fetch('/api/change-password', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username: user.username, currentPassword, newPassword })
@@ -575,7 +575,7 @@
 
             // Mesajları sunucudan çek ve ekrana bas
             async function fetchAndRenderMessages() {
-                const res = await fetch('http://localhost:3001/api/chat-messages');
+                const res = await fetch('/api/chat-messages');
                 const data = await res.json();
                 chatMessages.innerHTML = '';
                 // Kullanıcı bilgisi (yetki kontrolü için)
@@ -605,7 +605,7 @@
                         btn.addEventListener('click', async function(e) {
                             const idx = parseInt(btn.getAttribute('data-msg-idx'));
                             // Mesajı silmek için API çağrısı
-                            const res = await fetch('http://localhost:3001/api/delete-chat-message', {
+                            const res = await fetch('/api/delete-chat-message', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ idx, username: user.username })
@@ -630,7 +630,7 @@
                 const tag = user.tag || '';
                 const username = user.username || 'Kullanıcı';
                 const avatar = user.avatar || '';
-                await fetch('http://localhost:3001/api/chat-message', {
+                await fetch('/api/chat-message', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, tag, avatar, text: msg })
