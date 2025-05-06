@@ -31,28 +31,95 @@
                         <input type="password" id="register-password" placeholder="Şifre" required>
                         <input type="password" id="register-password2" placeholder="Şifre Tekrar" required>
                         <input type="text" id="register-tag" placeholder="Kart Etiketi (max 2 karakter)" maxlength="2" required>
-                        <button type="submit">Kayıt Ol</button>
+                        <div style="margin:8px 0 0 0; display:flex; flex-direction:column; gap:2px;">
+                            <label class="custom-checkbox-label">
+                                <input type="checkbox" id="register-eula-checkbox" class="custom-checkbox">
+                                <span class="custom-checkbox-box"></span>
+                                <span class="custom-checkbox-text">
+                                    <a href="#" id="register-eula-link" style="color:#ffd700; text-decoration:underline; cursor:pointer; font-size:0.91em;">EULA</a>'yı kabul ediyorum
+                                </span>
+                            </label>
+                            <label class="custom-checkbox-label">
+                                <input type="checkbox" id="register-tos-checkbox" class="custom-checkbox">
+                                <span class="custom-checkbox-box"></span>
+                                <span class="custom-checkbox-text">
+                                    <a href="#" id="register-tos-link" style="color:#ffd700; text-decoration:underline; cursor:pointer; font-size:0.91em;">Hizmet Şartları</a>'nı kabul ediyorum
+                                </span>
+                            </label>
+                        </div>
+                        <button type="submit" id="register-submit-btn">Kayıt Ol</button>
+                        <button type="button" id="back-to-login-btn" style="margin-top:8px; background:#232323; color:#ffd700; border:none; border-radius:6px; padding:8px 0; font-size:1em; cursor:pointer;">Geri Dön</button>
                         <div id="register-error" style="color:red; margin-top:8px; display:none;"></div>
                     </form>
+                    <style>
+                        .custom-checkbox-label {
+                            font-size:0.91em;
+                            display:flex;
+                            align-items:center;
+                            gap:7px;
+                            color:#ccc;
+                            user-select:none;
+                            cursor:pointer;
+                        }
+                        .custom-checkbox {
+                            display:none;
+                        }
+                        .custom-checkbox-box {
+                            width:16px;
+                            height:16px;
+                            border:1.5px solid #ffd700;
+                            border-radius:4px;
+                            background:#232323;
+                            display:inline-block;
+                            position:relative;
+                            transition:box-shadow 0.18s, border-color 0.18s;
+                            margin:0;
+                            vertical-align:middle;
+                        }
+                        .custom-checkbox-label:hover .custom-checkbox-box {
+                            box-shadow:0 0 0 2px #ffd70099;
+                            border-color:#ffe066;
+                        }
+                        .custom-checkbox:checked + .custom-checkbox-box {
+                            background: #ffd700;
+                            border-color: #ffd700;
+                        }
+                        .custom-checkbox:checked + .custom-checkbox-box::after {
+                            content: '';
+                            position: absolute;
+                            left: 4px;
+                            top: 1.5px;
+                            width: 6px;
+                            height: 10px;
+                            border: solid #232323;
+                            border-width: 0 2.2px 2.2px 0;
+                            border-radius:1px;
+                            transform: rotate(45deg);
+                            display: block;
+                        }
+                        .custom-checkbox-text {
+                            line-height:1.2;
+                            font-size:0.91em;
+                        }
+                    </style>
                 </div>
                 <!-- Giriş yapmış kullanıcı için gösterilecek alanlar (varsayılan olarak gizli) -->
                 <div class="user-content" id="user-content" style="display:none;">
-                    <nav class="side-menu">
+                    <nav class="side-menu" id="side-menu">
                         <a href="#">Galeri</a>
                         <a href="#">Sanayi</a>
                         <a href="#">Market</a>
                         <a href="#">Pazar</a>
-                        <a href="#">Envanter</a>
+                        <a href="#" id="user-menu-link">Kullanıcı</a>
                     </nav>
-                    <div class="user-card" id="user-card">
-                        <img id="user-avatar" src="https://ui-avatars.com/api/?name=&background=222&color=fff&size=96" alt="Avatar" class="user-avatar">
-                        <div class="user-card-name" id="user-card-name">Talha</div>
-                        <div class="user-card-username" id="user-card-username" style="font-size:0.98em; color:#bbb; margin-top:2px;">@talha</div>
+                    <div class="user-card" id="user-card" style="padding:32px 0 24px 0; min-width:220px; max-width:320px; margin:0 auto 12px auto; border-radius:16px; background:#232323; box-shadow:0 4px 24px #0003; display:flex; flex-direction:column; align-items:center;">
+                        <img id="user-avatar" src="https://ui-avatars.com/api/?name=&background=222&color=fff&size=128" alt="Avatar" class="user-avatar" style="width:96px; height:96px; border-radius:50%; margin-bottom:12px;">
+                        <div class="user-card-name" id="user-card-name" style="font-size:1.35em; font-weight:bold;">Talha</div>
+                        <div class="user-card-username" id="user-card-username" style="font-size:1.08em; color:#bbb; margin-top:4px;">@talha</div>
                     </div>
-                    <!-- Kullanıcı bilgileri burada gösterilecek -->
-                    <h2>Kullanıcı Bilgileri</h2>
-                    <p>Ad: <span id="user-name">Talha</span></p>
-                    <p>Email: <span id="user-email"></span></p>
+                </div>
+              <div style="position:absolute; left:0; right:0; bottom:18px; text-align:center; color:#888; font-size:0.97em; pointer-events:none;">
+                    © 2024 PixelCarProject. Tüm hakları saklıdır.<a id="eula-link" href="#" style="color:#ffd700; text-decoration:none; margin-left:8px; font-size:0.97em; opacity:0.85; pointer-events:auto; cursor:pointer;">EULA</a>
                 </div>
             </div>
         </div>
@@ -60,16 +127,21 @@
             <div class="panel-navbar">
                 <span class="panel-navbar-title">Sohbet</span>
             </div>
-            <div class="chat-channel" style="position:relative;">
-                <div class="chat-header">
-                    Aktif Kullanıcılar Sohbet Kanalı
+            <div class="chat-channel" style="position:relative; display:flex; flex-direction:column; height:420px; max-height:100%;">
+                <div class="chat-header" id="chat-header" style="position:relative;">
+                    Sohbet Kanalı
+                  <span id="chat-status-indicator" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font-size:1em; font-weight:bold;"></span>
                 </div>
-                <div class="chat-messages" id="chat-messages">
+                
+                <div class="chat-messages" id="chat-messages" style="flex:1 1 0; min-height:0; max-height:100%; overflow-y:auto;">
                     <!-- Sohbet mesajları burada listelenecek -->
                 </div>
-                <form class="chat-input-area" id="chat-form" autocomplete="off" style="background:#222; border-top:1.5px solid #444;">
-                    <input type="text" id="chat-input" placeholder="Mesajınızı yazın..." style="background:#222; color:#fff; border:1.5px solid #444; border-radius:6px; padding:10px 14px; font-size:1em; outline:none; transition:border 0.2s;">
-                    <button id="send-btn" type="submit" style="padding:10px 24px; border-radius:6px; border:none; background:#ffd700; color:#222; font-weight:bold; font-size:1.08em; cursor:pointer; margin-left:8px; transition:background 0.18s, color 0.18s;">Gönder</button>
+              <form class="chat-input-area" id="chat-form" autocomplete="off" style="background:#222; border-top:1.5px solid #444; display:flex; flex-direction:column;">
+                    <div id="typing-indicator" style="min-height:22px; color:#ffd700; font-size:0.99em; padding:2px 8px 2px 0; background:transparent; opacity:0; transition:opacity 0.22s;"></div>
+                    <div style="display:flex; align-items:center;">
+                        <input type="text" id="chat-input" placeholder="Mesajınızı yazın..." style="background:#222; color:#fff; border:1.5px solid #444; border-radius:6px; padding:10px 14px; font-size:1em; outline:none; transition:border 0.2s; flex:1;">
+                        <button id="send-btn" type="submit" style="padding:10px 24px; border-radius:6px; border:none; background:#ffd700; color:#222; font-weight:bold; font-size:1.08em; cursor:pointer; margin-left:8px; transition:background 0.18s, color 0.18s;">Gönder</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -83,19 +155,47 @@
 
     <!-- Profil düzenleme modalı -->
     <div id="profile-edit-modal" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:#000a; z-index:2000; align-items:center; justify-content:center;">
-        <div style="background:#232323; border-radius:12px; padding:32px 28px; min-width:320px; color:#fff; box-shadow:0 4px 32px #000a; display:flex; flex-direction:column; gap:18px; align-items:center; position:relative;">
+        <div style="background:#232323; border-radius:12px; padding:32px 28px; min-width:320px; color:#fff; box-shadow:0 4px 32px #000a; display:flex; flex-direction:column; gap:9px; align-items:center; position:relative;">
             <span style="position:absolute; right:18px; top:12px; cursor:pointer; font-size:1.3em;" id="close-profile-edit">&times;</span>
             <h2 style="margin:0 0 12px 0;">Profili Düzenle</h2>
-            <label for="edit-username" style="width:100%; text-align:left;">Kullanıcı Adı</label>
-            <input id="edit-username" type="text" maxlength="20" style="width:100%; padding:10px; border-radius:6px; border:1.5px solid #444; background:#222; color:#fff; font-size:1em;" autocomplete="off">
+            <label for="edit-username" style="width:100%; text-align:left; margin-bottom:0;">Kullanıcı Adı</label>
+            <input id="edit-username" type="text" maxlength="20"
+                style="width:100%; padding:10px; border-radius:6px; border:1.5px solid #444; background:#222; color:#fff; font-size:1em; margin-top:4px;"
+                autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="text" tabindex="1"
+                onfocus="this.setAttribute('autocomplete','new-password');" onmousedown="this.setAttribute('autocomplete','new-password');">
             <div id="profile-edit-info" style="color:#ffd700; font-size:0.98em; margin-bottom:8px;"></div>
-            <label for="edit-displayname" style="width:100%; text-align:left;">Görünen Ad (max 20 karakter)</label>
-            <input id="edit-displayname" type="text" maxlength="20" style="width:100%; padding:10px; border-radius:6px; border:1.5px solid #444; background:#222; color:#fff; font-size:1em;">
+            <label for="edit-displayname" style="width:100%; text-align:left; margin-bottom:0;">Görünen Ad</label>
+            <input id="edit-displayname" type="text" maxlength="20" style="width:100%; padding:10px; border-radius:6px; border:1.5px solid #444; background:#222; color:#fff; font-size:1em; margin-top:4px;">
             <div id="displayname-edit-info" style="color:#ffd700; font-size:0.98em; margin-bottom:8px;"></div>
-            <label for="edit-tag" style="width:100%; text-align:left;">Kart Etiketi (max 2 harf)</label>
-            <input id="edit-tag" type="text" maxlength="2" style="width:100%; padding:10px; border-radius:6px; border:1.5px solid #444; background:#222; color:#fff; font-size:1em; text-transform:uppercase;" autocomplete="off">
+            <label for="edit-tag" style="width:100%; text-align:left; margin-bottom:0;">Kart Etiketi</label>
+            <input id="edit-tag" type="text" placeholder="2&" maxlength="2" style="width:100%; padding:10px; border-radius:6px; border:1.5px solid #444; background:#222; color:#fff; font-size:1em; text-transform:uppercase; autocomplete:off; margin-top:4px;">
             <div id="tag-edit-info" style="color:#ffd700; font-size:0.98em; margin-bottom:8px;"></div>
             <button id="save-profile-btn" style="padding:10px 0; border-radius:6px; border:none; background:#ffd700; color:#222; font-weight:bold; font-size:1.08em; cursor:pointer; width:100%;">Kaydet</button>
+            <button id="delete-account-btn" style="margin-top:10px; padding:10px 0; border-radius:6px; border:2px solid #e53935; background:transparent; color:#e53935; font-weight:bold; font-size:1.08em; cursor:pointer; width:100%;">Hesabı Sil</button>
+        </div>
+    </div>
+
+    <!-- Hesabı Sil Onay Modalı -->
+    <div id="delete-account-confirm-modal" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:#000a; z-index:3000; align-items:center; justify-content:center;">
+        <div style="background:#232323; border-radius:12px; padding:32px 28px; min-width:320px; color:#fff; box-shadow:0 4px 32px #000a; display:flex; flex-direction:column; gap:18px; align-items:center; position:relative;">
+            <span style="position:absolute; right:18px; top:12px; cursor:pointer; font-size:1.3em;" id="close-delete-account-confirm">&times;</span>
+            <div style="font-size:1.13em; text-align:center; margin-bottom:8px;">Hesabınızı silmek istediğinizden emin misiniz?</div>
+            <div style="display:flex; gap:14px; width:100%; justify-content:center;">
+                <button id="delete-account-confirm-yes" style="padding:10px 0; border-radius:6px; border:2px solid #e53935; background:transparent; color:#e53935; font-weight:bold; font-size:1.08em; cursor:pointer; min-width:100px;">Evet</button>
+                <button id="delete-account-confirm-no" style="padding:10px 0; border-radius:6px; border:none; background:#ffd700; color:#222; font-weight:bold; font-size:1.08em; cursor:pointer; min-width:100px;">Hayır</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hesabı Sil Doğrulama Modalı -->
+    <div id="delete-account-verify-modal" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:#000a; z-index:3100; align-items:center; justify-content:center;">
+        <div style="background:#232323; border-radius:12px; padding:32px 28px; min-width:320px; color:#fff; box-shadow:0 4px 32px #000a; display:flex; flex-direction:column; gap:18px; align-items:center; position:relative;">
+            <span style="position:absolute; right:18px; top:12px; cursor:pointer; font-size:1.3em;" id="close-delete-account-verify">&times;</span>
+            <div id="delete-account-verify-title" style="font-size:1.13em; text-align:center; margin-bottom:8px;"></div>
+            <input id="delete-account-verify-input" type="text" placeholder="Kullanıcı adınızı yazınız" style="width:100%; max-width:100%; box-sizing:border-box; padding:10px; border-radius:6px; border:1.5px solid #444; background:#222; color:#fff; font-size:1em;">
+            <input id="delete-account-verify-password" type="password" placeholder="Şifrenizi yazınız" style="width:100%; max-width:100%; box-sizing:border-box; padding:10px; border-radius:6px; border:1.5px solid #444; background:#222; color:#fff; font-size:1em;">
+            <div id="delete-account-verify-error" style="color:#e53935; font-size:0.98em; margin-bottom:8px; display:none;"></div>
+            <button id="delete-account-final-btn" style="padding:10px 0; border-radius:6px; border:2px solid #e53935; background:transparent; color:#e53935; font-weight:bold; font-size:1.08em; cursor:pointer; width:100%;">Hesabı Sil</button>
         </div>
     </div>
 
@@ -109,6 +209,89 @@
             <input id="new-password2" type="password" placeholder="Yeni Şifre Tekrar" style="width:100%; padding:10px; border-radius:6px; border:1.5px solid #444; background:#222; color:#fff;">
             <div id="password-modal-info" style="color:#ffd700; font-size:0.98em; margin-bottom:8px;"></div>
             <button id="save-password-btn" style="padding:10px 0; border-radius:6px; border:none; background:#ffd700; color:#222; font-weight:bold; font-size:1.08em; cursor:pointer; width:100%;">Şifreyi Değiştir</button>
+        </div>
+    </div>
+      
+      <!-- EULA Modal -->
+    <!-- EULA Modal -->
+    <div id="eula-modal" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:#000a; z-index:3000; align-items:center; justify-content:center;">
+        <div style="background:#232323; border-radius:12px; padding:32px 28px; min-width:340px; max-width:90vw; max-height:90vh; color:#fff; box-shadow:0 4px 32px #000a; display:flex; flex-direction:column; gap:18px; align-items:center; position:relative; overflow:auto;">
+            <span style="position:absolute; right:18px; top:12px; cursor:pointer; font-size:1.3em;" id="close-eula-modal">&times;</span>
+            <h2 style="margin:0 0 12px 0;">Kullanıcı Lisans Sözleşmesi (EULA)</h2>
+            <div id="eula-content" style="text-align:left; color:#eee; font-size:1em; max-width:600px; max-height:60vh; overflow:auto; scrollbar-width:none; -ms-overflow-style:none;">
+                <style>
+                    #eula-content::-webkit-scrollbar { display: none; }
+                </style>
+                <h1 style="font-size:1.35em; margin-bottom:0.2em;">📜 End User License Agreement (EULA)</h1>
+                <div style="font-size:1em; color:#ffd700; margin-bottom:0.5em;">
+                    <b>Version:</b> 1.0<br>
+                    <b>Date:</b> April 30, 2025<br>
+                    <b>Owner:</b> Said Başara
+                </div>
+                <hr style="border:0; border-top:1px solid #444; margin:10px 0;">
+                <h2 style="font-size:1.13em; color:#ffd700;">1. Introduction</h2>
+                <p>
+                    This End User License Agreement (“Agreement”) is a legal agreement between you (“User”) and Said Başara (“Licensor”) regarding the use of the software product (“Software”) developed and owned by the Licensor. By installing, copying, or otherwise using the Software, you agree to be bound by the terms of this Agreement.
+                </p>
+                <hr style="border:0; border-top:1px solid #444; margin:10px 0;">
+                <h2 style="font-size:1.13em; color:#ffd700;">2. License Grant</h2>
+                <p>
+                    The Licensor grants you a limited, non-exclusive, non-transferable license to use the Software solely for personal, non-commercial purposes. The Software is <b>licensed, not sold</b>.
+                </p>
+                <hr style="border:0; border-top:1px solid #444; margin:10px 0;">
+                <h2 style="font-size:1.13em; color:#ffd700;">3. Restrictions</h2>
+                <p>You may <b>not</b>:</p>
+                <ul style="margin-left:1.2em;">
+                    <li>Copy, reproduce, distribute, or sublicense the Software in whole or in part;</li>
+                    <li>Reverse engineer, decompile, or disassemble the Software;</li>
+                    <li>Rent, lease, or sell the Software to third parties;</li>
+                    <li>Modify the Software or create derivative works based on it.</li>
+                </ul>
+                <hr style="border:0; border-top:1px solid #444; margin:10px 0;">
+                <h2 style="font-size:1.13em; color:#ffd700;">4. Intellectual Property</h2>
+                <p>
+                    The Software and all associated intellectual property rights are and shall remain the sole property of Said Başara. This Agreement does not grant you any ownership rights in the Software.
+                </p>
+                <hr style="border:0; border-top:1px solid #444; margin:10px 0;">
+                <h2 style="font-size:1.13em; color:#ffd700;">5. Disclaimer of Warranty</h2>
+                <p>
+                    The Software is provided “<b>AS IS</b>” without warranty of any kind. The Licensor makes no warranties, express or implied, including but not limited to merchantability or fitness for a particular purpose. The Licensor shall not be liable for any damages arising from the use or inability to use the Software.
+                </p>
+                <hr style="border:0; border-top:1px solid #444; margin:10px 0;">
+                <h2 style="font-size:1.13em; color:#ffd700;">6. Termination</h2>
+                <p>
+                    This Agreement is effective until terminated. It will terminate automatically without notice if you fail to comply with any of its terms. Upon termination, you must immediately stop using and destroy all copies of the Software.
+                </p>
+                <hr style="border:0; border-top:1px solid #444; margin:10px 0;">
+                <h2 style="font-size:1.13em; color:#ffd700;">7. Governing Law</h2>
+                <p>
+                    This Agreement shall be governed by and construed in accordance with the laws of the Republic of Turkey. Any disputes shall be subject to the exclusive jurisdiction of the courts of Istanbul (Anatolian Side), Turkey.
+                </p>
+                <hr style="border:0; border-top:1px solid #444; margin:10px 0;">
+                <h2 style="font-size:1.13em; color:#ffd700;">8. Contact</h2>
+                <p>
+                    For any questions regarding this Agreement, please contact:<br>
+                    📧 <b>Email:</b> <a href="mailto:saidbasara7@gmail.com" style="color:#ffd700;">saidbasara7@gmail.com</a>
+                </p>
+                <hr style="border:0; border-top:1px solid #444; margin:10px 0;">
+                <h2 style="font-size:1.13em; color:#ffd700;">Acceptance</h2>
+                <p>
+                    By installing or using the Software, you acknowledge that you have read, understood, and agreed to be bound by the terms and conditions of this Agreement.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ban Onay Modalı -->
+    <div id="ban-user-modal" style="display:none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:#000a; z-index:4000; align-items:center; justify-content:center;">
+        <div style="background:#232323; border-radius:12px; padding:32px 28px; min-width:320px; color:#fff; box-shadow:0 4px 32px #000a; display:flex; flex-direction:column; gap:18px; align-items:center; position:relative;">
+            <span style="position:absolute; right:18px; top:12px; cursor:pointer; font-size:1.3em;" id="close-ban-user-modal">&times;</span>
+            <div id="ban-user-modal-title" style="font-size:1.13em; text-align:center; margin-bottom:8px;"></div>
+            <div style="display:flex; gap:14px; width:100%; justify-content:center;">
+                <button id="ban-user-yes-btn" style="padding:10px 0; border-radius:6px; border:2px solid #e53935; background:transparent; color:#e53935; font-weight:bold; font-size:1.08em; cursor:pointer; min-width:100px;">Evet</button>
+                <button id="ban-user-no-btn" style="padding:10px 0; border-radius:6px; border:none; background:#ffd700; color:#222; font-weight:bold; font-size:1.08em; cursor:pointer; min-width:100px;">Hayır</button>
+            </div>
+            <div id="ban-user-modal-info" style="color:#ffd700; font-size:0.98em; margin-bottom:8px; display:none;"></div>
         </div>
     </div>
 
@@ -126,6 +309,32 @@
                 document.getElementById('login-card').style.display = 'flex';
                 document.getElementById('user-content').style.display = 'none';
             }
+          
+            // Sohbet başlığına tarih ekle ve durum göstergesi ekle
+            const chatHeader = document.getElementById('chat-header');
+            function updateChatHeaderStatus(isLocked) {
+                const chatStatusIndicator = document.getElementById('chat-status-indicator');
+                if (chatStatusIndicator) {
+                    if (isLocked) {
+                        chatStatusIndicator.textContent = "KAPALI";
+                        chatStatusIndicator.style.color = "#e53935";
+                    } else {
+                        chatStatusIndicator.textContent = "AÇIK";
+                        chatStatusIndicator.style.color = "#43a047";
+                    }
+                }
+            }
+            const now = new Date();
+            const day = now.getDate().toString().padStart(2, '0');
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            const year = now.getFullYear();
+            chatHeader.innerHTML = `Sohbet Kanalı
+                <span id="chat-status-indicator" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font-size:1em; font-weight:bold;"></span>
+                <span style="float:right; color:#ffd700; font-size:0.98em; font-weight:normal;">${day}.${month}.${year}</span>`;
+
+            // chatStatusIndicator referansını güncelle (çünkü innerHTML ile tekrar oluşturuldu)
+            const chatStatusIndicator2 = document.getElementById('chat-status-indicator');
+
 
             // Giriş formu submit işlemi
             const loginForm = document.getElementById('login-form');
@@ -140,24 +349,65 @@
             const loginUsernameInput = document.getElementById('login-username');
             const tagInput = document.getElementById('edit-tag');
             const tagEditInfo = document.getElementById('tag-edit-info');
+          
+          const backToLoginBtn = document.getElementById('back-to-login-btn');
+            if (backToLoginBtn) {
+                backToLoginBtn.addEventListener('click', function() {
+                    registerCard.style.display = 'none';
+                    loginCard.style.display = 'flex';
+                });
+            }
 
             function updateUserCard(data) {
                 const displayName = data.user.displayName || data.user.display_name || data.user.username;
                 document.getElementById('user-card-name').textContent = displayName;
                 document.getElementById('user-card-username').textContent = '@' + data.user.username;
-                document.getElementById('user-name').textContent = displayName;
-                document.getElementById('user-email').textContent = data.user.email || '';
-                // Avatarı: önce data.user.avatar varsa onu, yoksa default avatarı göster
                 let avatarSrc = data.user.avatar
                     || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.user.tag || '')}&background=222&color=fff&size=96`;
                 document.getElementById('user-avatar').src = avatarSrc;
             }
+
+            function updateSideMenuUsername(username) {
+                const sideMenu = document.getElementById('side-menu');
+                const userMenuLink = document.getElementById('user-menu-link');
+                if (sideMenu && userMenuLink) {
+                    userMenuLink.textContent = username;
+                }
+            }
+
+            function showUserPanel() {
+                const userCard = document.getElementById('user-card');
+                userCard.style.display = '';
+            }
+            function hideUserPanel() {
+                const userCard = document.getElementById('user-card');
+                userCard.style.display = 'none';
+            }
+
+            document.getElementById('user-menu-link').addEventListener('click', function(e) {
+                e.preventDefault();
+                showUserPanel();
+                const galleryPanel = document.getElementById('gallery-panel');
+                if (galleryPanel) galleryPanel.remove();
+            });
 
             function showUserContent(data) {
                 document.getElementById('login-card').style.display = 'none';
                 document.getElementById('register-card').style.display = 'none';
                 document.getElementById('user-content').style.display = 'block';
                 updateUserCard(data);
+                updateSideMenuUsername(data.user.displayName || data.user.display_name || data.user.username);
+                const username = data.user.username;
+                fetch('/api/permission?username=' + encodeURIComponent(username))
+                    .then(r => r.json())
+                    .then(res => {
+                        if (res && typeof res.authority !== "undefined") {
+                            // localStorage'daki user objesini güncelle
+                            let user = JSON.parse(localStorage.getItem('pixelcar_user') || '{}');
+                            user.authority = res.authority;
+                            localStorage.setItem('pixelcar_user', JSON.stringify(user));
+                        }
+                    });
             }
 
             function hideUserContent() {
@@ -206,6 +456,8 @@
                 const password = document.getElementById('register-password').value;
                 const password2 = document.getElementById('register-password2').value;
                 const tag = document.getElementById('register-tag').value;
+                const registerEulaCheckbox = document.getElementById('register-eula-checkbox');
+                const registerTosCheckbox = document.getElementById('register-tos-checkbox');
                 if (password !== password2) {
                     registerErrorDiv.textContent = 'Şifreler eşleşmiyor!';
                     registerErrorDiv.style.display = 'block';
@@ -213,6 +465,12 @@
                 }
                 if (!tag || tag.length > 2) {
                     registerErrorDiv.textContent = 'Etiket en fazla 2 karakter olmalı!';
+                    registerErrorDiv.style.display = 'block';
+                    return;
+                }
+                // EULA ve TOS onay kontrolü
+                if (!(registerEulaCheckbox && registerEulaCheckbox.checked && registerTosCheckbox && registerTosCheckbox.checked)) {
+                    registerErrorDiv.textContent = 'Kayıt olmak için sözleşmeleri kabul etmelisiniz!';
                     registerErrorDiv.style.display = 'block';
                     return;
                 }
@@ -250,7 +508,19 @@
                     editUsernameInput.setSelectionRange(start - (val.length - newVal.length), end - (val.length - newVal.length));
                 }
             });
-
+            // Otomatik doldurma/autofill engelle (profil düzenle)
+            editUsernameInput.setAttribute('autocomplete', 'new-password');
+            editUsernameInput.setAttribute('autocorrect', 'off');
+            editUsernameInput.setAttribute('autocapitalize', 'off');
+            editUsernameInput.setAttribute('spellcheck', 'false');
+            editUsernameInput.setAttribute('inputmode', 'text');
+            editUsernameInput.setAttribute('tabindex', '1');
+            editUsernameInput.addEventListener('focus', function() {
+                editUsernameInput.setAttribute('autocomplete', 'new-password');
+            });
+            editUsernameInput.addEventListener('mousedown', function() {
+                editUsernameInput.setAttribute('autocomplete', 'new-password');
+            });
             // Kayıt olurken kullanıcı adı kutusunda SADECE İngilizce harf ve büyük harf serbest, boşluk yok
             registerUsernameInput.addEventListener('input', function() {
                 let val = registerUsernameInput.value;
@@ -387,6 +657,18 @@
                 displayNameEditInfo.textContent = '';
                 tagEditInfo.textContent = '';
 
+                // "Hesabı Sil" butonunu admin için gizle
+                const deleteAccountBtn = document.getElementById('delete-account-btn');
+                if (deleteAccountBtn) {
+                    if (user.username && user.username.toLowerCase() === 'admin') {
+                        deleteAccountBtn.style.display = 'none';
+                    } else {
+                        deleteAccountBtn.style.display = '';
+                    }
+                }
+
+                let usernameChangeAllowed = true;
+
                 // Butonun ilk durumu: değişiklik yoksa disable
                 function updateSaveProfileBtnState() {
                     const currentUsername = editUsernameInput.value.trim();
@@ -396,7 +678,7 @@
                     const displayNameChanged = currentDisplayName !== (user.displayName || '');
                     const tagChanged = currentTag !== (user.tag || '');
                     // Kullanıcı adı alanı disable ise sadece görünen ad ve tag değişikliği kontrol edilir
-                    if (editUsernameInput.disabled && !displayNameChanged && !tagChanged) {
+                    if ((editUsernameInput.disabled || !usernameChangeAllowed) && !displayNameChanged && !tagChanged) {
                         saveProfileBtn.disabled = true;
                         saveProfileBtn.style.background = "#888";
                         saveProfileBtn.style.color = "#ccc";
@@ -413,7 +695,7 @@
                         saveProfileBtn.style.cursor = "pointer";
                     }
                 }
-
+              
                 editUsernameInput.addEventListener('input', updateSaveProfileBtnState);
                 editDisplayNameInput.addEventListener('input', updateSaveProfileBtnState);
                 tagInput.addEventListener('input', updateSaveProfileBtnState);
@@ -423,13 +705,15 @@
                     .then(r => r.json())
                     .then(data => {
                         if (data.remaining && data.remaining > 0) {
-                            const dakika = Math.floor((data.remaining % 3600) / 60);
-                            const saniye = data.remaining % 60;
-                            profileEditInfo.textContent = `Kullanıcı adını tekrar değiştirmek için kalan süre: ${dakika} dakika ${saniye} saniye`;
+                            // Sadece gün olarak göster
+                            const days = Math.ceil(data.remaining / 86400);
+                            profileEditInfo.textContent = `Kullanıcı adını tekrar değiştirmek için kalan süre: ${days} gün`;
                             editUsernameInput.disabled = true;
+                            usernameChangeAllowed = false;
                         } else {
                             profileEditInfo.textContent = '';
                             editUsernameInput.disabled = false;
+                            usernameChangeAllowed = true;
                         }
                         updateSaveProfileBtnState();
                     });
@@ -478,12 +762,23 @@
                 const newUsername = editUsernameInput.value.trim();
                 const newDisplayName = editDisplayNameInput.value.trim();
                 const newTag = tagInput.value.trim();
+                // Kullanıcı adı kalan süre kontrolü
+                if (typeof usernameChangeAllowed !== "undefined" && (editUsernameInput.disabled || !usernameChangeAllowed)) {
+                    if (newUsername !== user.username) {
+                        profileEditInfo.textContent = "Bir şeyler ters gitti. Kullanıcı adını şu anda değiştiremezsiniz.";
+                        return;
+                    }
+                }
                 if (!newUsername) {
                     profileEditInfo.textContent = "Kullanıcı adı boş olamaz!";
                     return;
                 }
                 if (newDisplayName.length > 15) {
                     displayNameEditInfo.textContent = "Görünen ad en fazla 15 karakter olmalı!";
+                    return;
+                }
+                if (!newTag) {
+                    tagEditInfo.textContent = "Etiket boş bırakılamaz!";
                     return;
                 }
                 if (newTag.length > 2) {
@@ -572,26 +867,92 @@
             const chatMessages = document.getElementById('chat-messages');
             const chatForm = document.getElementById('chat-form');
             const chatInput = document.getElementById('chat-input');
+          const typingIndicator = document.getElementById('typing-indicator');
+          let chatLocked = false; // Sohbet kilitli mi?
+            let typingTimeout = null;
+            let lastTypingSent = 0;
+
+            // Yazıyor bilgisini backend'e gönder
+            chatInput.addEventListener('input', function() {
+                const user = JSON.parse(localStorage.getItem('pixelcar_user') || '{}');
+                if (!user.username) return;
+                const now = Date.now();
+                if (now - lastTypingSent > 2000) {
+                    fetch('/api/typing', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username: user.username, displayName: user.displayName || user.display_name || user.username })
+                    });
+                    lastTypingSent = now;
+                }
+            });
+
+            // Yazıyor bilgisini backend'den çek ve göster
+            async function fetchTypingUsers() {
+                const res = await fetch('/api/typing');
+                const data = await res.json();
+                if (data.typing && data.typing.length > 0) {
+                    const user = JSON.parse(localStorage.getItem('pixelcar_user') || '{}');
+                    const others = data.typing.filter(u => u.username !== user.username);
+                    if (others.length > 0) {
+                        // Tek kişi: "Ahmet yazıyor...", birden fazla: "Ahmet, Ayşe yazıyor..."
+                        const names = others.map(u => u.displayName || u.username);
+                        typingIndicator.textContent = `${names.join(', ')} yazıyor...`;
+                      typingIndicator.style.opacity = "1";
+                    } else {
+                        setTimeout(() => { typingIndicator.textContent = ''; }, 220);
+                      typingIndicator.style.opacity = "0";
+                    }
+                } else {
+                    setTimeout(() => { typingIndicator.textContent = ''; }, 220);
+                  typingIndicator.style.opacity = "0";
+                }
+            }
+            setInterval(fetchTypingUsers, 1000);
 
             // Mesajları sunucudan çek ve ekrana bas
             async function fetchAndRenderMessages() {
                 const res = await fetch('/api/chat-messages');
                 const data = await res.json();
+                chatLocked = !!data.chatLocked;
+                updateChatHeaderStatus(chatLocked);
+                const isAtBottom = chatMessages.scrollTop + chatMessages.clientHeight >= chatMessages.scrollHeight - 10;
                 chatMessages.innerHTML = '';
-                // Kullanıcı bilgisi (yetki kontrolü için)
                 const user = JSON.parse(localStorage.getItem('pixelcar_user') || '{}');
                 const isMod = user && user.authority === 2;
                 (data.messages || []).forEach((msg, idx) => {
                     const avatarUrl = msg.avatar
                         || `https://ui-avatars.com/api/?name=${encodeURIComponent(msg.tag || '')}&background=222&color=fff&size=32`;
+                    let timeStr = '';
+                    if (msg.time) {
+                        const d = new Date(msg.time);
+                        const h = d.getHours().toString().padStart(2, '0');
+                        const m = d.getMinutes().toString().padStart(2, '0');
+                        timeStr = `${h}:${m}`;
+                    }
+                    const isOwnMsg = user && msg.username === user.username;
+                    const showDeleteBtn = isMod || isOwnMsg;
+                    // Kullanıcı adı admin ise siyah, kendi mesajı ise beyaz, diğerleri varsayılan
+                    let usernameStyle = '';
+                    let textStyle = '';
+                    if (msg.username && msg.username.toLowerCase() === 'admin') {
+                        usernameStyle = 'color:#111; background:#ffd700; border-radius:4px; padding:1px 6px;';
+                        textStyle = 'font-weight:bold;';
+                    } else if (isOwnMsg) {
+                        usernameStyle = 'color:#fff; border-radius:4px; 6px;';
+                    }
                     const msgDiv = document.createElement('div');
                     msgDiv.className = 'chat-message-row';
+                    msgDiv.style.display = 'flex';
+                    msgDiv.style.alignItems = 'center';
                     msgDiv.innerHTML = `
                         <img src="${avatarUrl}" alt="avatar" class="chat-avatar">
-                        <span class="chat-user"><b>${msg.username}</b>:</span>
-                        <span class="chat-text">${msg.text}</span>
+                        <span class="chat-user" style="margin-left:4px;${usernameStyle}"><b>${msg.username}</b></span>
+                        <span class="chat-text" style="margin-left:6px;${textStyle}">${msg.text}</span>
+                        <span style="flex:1"></span>
+                        <span class="chat-time" style="color:#bbb; font-size:0.93em; margin-left:10px; min-width:38px; text-align:right;">${timeStr}</span>
                         ${
-                            isMod
+                            showDeleteBtn
                                 ? `<button class="chat-delete-btn" data-msg-idx="${idx}" style="margin-left:8px; background:#c00; color:#fff; border:none; border-radius:4px; padding:2px 8px; cursor:pointer;">Sil</button>`
                                 : ''
                         }
@@ -599,26 +960,57 @@
                     chatMessages.appendChild(msgDiv);
                 });
 
-                // Silme butonlarına event ekle (sadece yetkili kullanıcılar için)
-                if (isMod) {
-                    document.querySelectorAll('.chat-delete-btn').forEach(btn => {
-                        btn.addEventListener('click', async function(e) {
-                            const idx = parseInt(btn.getAttribute('data-msg-idx'));
-                            // Mesajı silmek için API çağrısı
-                            const res = await fetch('/api/delete-chat-message', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ idx, username: user.username })
-                            });
-                            if (res.ok) {
-                                fetchAndRenderMessages();
-                            } else {
-                                alert('Mesaj silinemedi.');
-                            }
+                // Silme butonlarına event ekle (kendi mesajı veya yetkili kullanıcılar için)
+                document.querySelectorAll('.chat-delete-btn').forEach(btn => {
+                    btn.addEventListener('click', async function(e) {
+                        const idx = parseInt(btn.getAttribute('data-msg-idx'));
+                        // Mesajı silmek için API çağrısı
+                        const res = await fetch('/api/delete-chat-message', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ idx, username: user.username })
                         });
+                        if (res.ok) {
+                            fetchAndRenderMessages();
+                        } else {
+                            showAlert('Mesaj silinemedi.');
+                        }
                     });
+                });
+                if (isAtBottom) {
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
                 }
-                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+          // Uyarı mesajı göstermek için fonksiyon (kırmızı, 5 saniye)
+            function showAlert(msg) {
+                let alertDiv = document.getElementById('custom-alert');
+                if (!alertDiv) {
+                    alertDiv = document.createElement('div');
+                    alertDiv.id = 'custom-alert';
+                    alertDiv.style.position = 'fixed';
+                    alertDiv.style.top = '32px';
+                    alertDiv.style.left = '50%';
+                    alertDiv.style.transform = 'translateX(-50%)';
+                    alertDiv.style.background = '#c00';
+                    alertDiv.style.color = '#fff';
+                    alertDiv.style.padding = '14px 32px';
+                    alertDiv.style.borderRadius = '8px';
+                    alertDiv.style.fontSize = '1.08em';
+                    alertDiv.style.fontWeight = 'bold';
+                    alertDiv.style.zIndex = '9999';
+                    alertDiv.style.boxShadow = '0 4px 24px #0008';
+                    alertDiv.style.transition = 'opacity 0.3s';
+                    alertDiv.style.opacity = '0.98';
+                    document.body.appendChild(alertDiv);
+                }
+                alertDiv.textContent = msg;
+                alertDiv.style.display = 'block';
+                alertDiv.style.opacity = '0.98';
+                clearTimeout(alertDiv._timeout);
+                alertDiv._timeout = setTimeout(() => {
+                    alertDiv.style.opacity = '0';
+                    setTimeout(() => { alertDiv.style.display = 'none'; }, 400);
+                }, 5000);
             }
 
             // Mesaj gönderme
@@ -630,6 +1022,121 @@
                 const tag = user.tag || '';
                 const username = user.username || 'Kullanıcı';
                 const avatar = user.avatar || '';
+                const msgLower = msg.trim().toLowerCase();
+
+                // / ile başlayan hiçbir komut chate gönderilmesin
+                if (msg.startsWith('/')) {
+                    // /per komutu
+                    if (msgLower === "/per") {
+                        let yetki = user.authority;
+                        if (yetki === undefined || yetki === null || yetki === "" || yetki === false) {
+                            const storedUser = localStorage.getItem('pixelcar_user');
+                            if (storedUser) {
+                                try {
+                                    const parsed = JSON.parse(storedUser);
+                                    yetki = parsed.authority;
+                                } catch {}
+                            }
+                        }
+                        showAlert("Yetki seviyeniz: " + (yetki !== undefined && yetki !== null && yetki !== "" ? yetki : "yok"));
+                        chatInput.value = '';
+                        return;
+                    }
+                    // /chat off ve /chat on komutları
+                    if (msgLower === "/chat off" || msgLower === "/chat on") {
+                        if (String(user.authority) !== "2" && user.authority !== 2) {
+                            showAlert("Bu komutu sadece yetkililer kullanabilir.");
+                            return;
+                        }
+                        // Komutun etkisi için sunucuya gönder (chate eklenmeyecek)
+                        await fetch('/api/chat-message', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ username, tag, avatar, text: msg })
+                        });
+                        if (msgLower === "/chat off") {
+                            showAlert("Chat kapalı");
+                            updateChatHeaderStatus(true);
+                        } else if (msgLower === "/chat on") {
+                            showAlert("Chat açık");
+                            updateChatHeaderStatus(false);
+                        }
+                        chatInput.value = '';
+                        fetchAndRenderMessages();
+                        return;
+                    }
+                    // /users komutu
+                    if (msgLower === "/users") {
+                        // Sadece yetki 2 olanlar için
+                        if (String(user.authority) !== "2" && user.authority !== 2) {
+                            showAlert("Bu komutu sadece yetkililer kullanabilir.");
+                            return;
+                        }
+                        const res = await fetch('/api/chat-message', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ username, tag, avatar, text: msg })
+                        });
+                        const data = await res.json();
+                        if (res.ok && data.download) {
+                            // Dosyayı otomatik indir
+                            const a = document.createElement('a');
+                            a.href = data.download;
+                            a.download = 'users_dump.txt';
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            showAlert("Kullanıcı listesi indirildi.");
+                        } else {
+                            showAlert(data.error || "Kullanıcı listesi indirilemedi.");
+                        }
+                        chatInput.value = '';
+                        return;
+                    }
+                    // /ban <kullanıcı> komutu
+                    if (msgLower.startsWith("/ban")) {
+                        if (String(user.authority) !== "2" && user.authority !== 2) {
+                            showAlert("Bu komutu sadece yetkililer kullanabilir.");
+                            return;
+                        }
+                        const parts = msg.trim().split(/\s+/);
+                        if (parts.length < 2 || !parts[1]) {
+                            showAlert("Banlanacak kullanıcı adını boş bıraktınız.");
+                            return;
+                        }
+                        const target = parts[1];
+                        if (!/^[a-zA-Z0-9]+$/.test(target)) {
+                            showAlert("Geçersiz kullanıcı adı.");
+                            return;
+                        }
+                        // Kullanıcı var mı kontrolü
+                        try {
+                            const checkRes = await fetch('/api/permission?username=' + encodeURIComponent(target));
+                            if (!checkRes.ok) {
+                                showAlert("Böyle bir kullanıcı yok.");
+                                return;
+                            }
+                        } catch {
+                            showAlert("Böyle bir kullanıcı yok.");
+                            return;
+                        }
+                        banTargetUser = target;
+                        banUserModalTitle.textContent = `${target} banlansın mı?`;
+                        banUserModalInfo.style.display = 'none';
+                        banUserModal.style.display = 'flex';
+                        chatInput.value = '';
+                        return;
+                    }
+                    // Diğer tüm / ile başlayan komutlar için de chate gönderme
+                    chatInput.value = '';
+                    return;
+                }
+
+                if (chatLocked && String(user.authority) !== "2" && user.authority !== 2) {
+                    showAlert("Sohbet şu anda kapalı. Sadece yetkililer mesaj atabilir.");
+                    return;
+                }
+
                 await fetch('/api/chat-message', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -639,10 +1146,243 @@
                 fetchAndRenderMessages();
             });
 
+            // Ban modal referansları
+            const banUserModal = document.getElementById('ban-user-modal');
+            const banUserModalTitle = document.getElementById('ban-user-modal-title');
+            const banUserYesBtn = document.getElementById('ban-user-yes-btn');
+            const banUserNoBtn = document.getElementById('ban-user-no-btn');
+            const closeBanUserModal = document.getElementById('close-ban-user-modal');
+            const banUserModalInfo = document.getElementById('ban-user-modal-info');
+            let banTargetUser = null;
+
+            // Ban modalı butonları
+            if (banUserNoBtn) {
+                banUserNoBtn.onclick = function() {
+                    banUserModal.style.display = 'none';
+                    banTargetUser = null;
+                };
+            }
+            if (closeBanUserModal) {
+                closeBanUserModal.onclick = function() {
+                    banUserModal.style.display = 'none';
+                    banTargetUser = null;
+                };
+            }
+            if (banUserYesBtn) {
+                banUserYesBtn.onclick = async function() {
+                    if (!banTargetUser) return;
+                    banUserYesBtn.disabled = true;
+                    banUserModalInfo.style.display = 'none';
+                    // Sunucuya silme isteği gönder
+                    const res = await fetch('/api/delete-account', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username: banTargetUser, password: '__admin_ban__' }) // password dummy, backend ignore etmeli
+                    });
+                    if (res.ok) {
+                        banUserModalInfo.style.display = 'block';
+                        banUserModalInfo.style.color = "#0f0";
+                        banUserModalInfo.textContent = "Kullanıcı başarıyla silindi.";
+                        setTimeout(() => {
+                            banUserModal.style.display = 'none';
+                            banUserModalInfo.style.display = 'none';
+                            banTargetUser = null;
+                            banUserYesBtn.disabled = false;
+                        }, 1200);
+                    } else {
+                        let data = {};
+                        try { data = await res.json(); } catch {}
+                        banUserModalInfo.style.display = 'block';
+                        banUserModalInfo.style.color = "#ffd700";
+                        banUserModalInfo.textContent = data.error || "Kullanıcı silinemedi.";
+                        banUserYesBtn.disabled = false;
+                    }
+                };
+            }
+            // Modal dışına tıklayınca kapat
+            window.addEventListener('click', function(e) {
+                if (e.target === banUserModal) {
+                    banUserModal.style.display = 'none';
+                    banTargetUser = null;
+                }
+            });
+
             // Her 2 saniyede bir mesajları güncelle
             setInterval(fetchAndRenderMessages, 2000);
             // Sayfa açılır açılmaz mesajları getir
             fetchAndRenderMessages();
+          setTimeout(() => {
+                updateChatHeaderStatus(chatLocked);
+            }, 100);
+          // EULA modal açma/kapama
+            const eulaLink = document.getElementById('eula-link');
+            const eulaModal = document.getElementById('eula-modal');
+            const closeEulaModal = document.getElementById('close-eula-modal');
+            eulaLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                eulaModal.style.display = 'flex';
+            });
+            closeEulaModal.addEventListener('click', function() {
+                eulaModal.style.display = 'none';
+            });
+            window.addEventListener('click', function(e) {
+                if (e.target === eulaModal) eulaModal.style.display = 'none';
+            });
+
+            // EULA ve TOS checkbox referansları
+            const registerEulaCheckbox = document.getElementById('register-eula-checkbox');
+            const registerTosCheckbox = document.getElementById('register-tos-checkbox');
+            const registerSubmitBtn = document.getElementById('register-submit-btn');
+            // EULA modalını açmak için kayıt ekranındaki link
+            const registerEulaLink = document.getElementById('register-eula-link');
+            if (registerEulaLink) {
+                registerEulaLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const eulaModal = document.getElementById('eula-modal');
+                    if (eulaModal) eulaModal.style.display = 'flex';
+                });
+            }
+            // Terms of Service linki (dummy, EULA ile aynı modalı açabilir veya başka bir modal eklenebilir)
+            const registerTosLink = document.getElementById('register-tos-link');
+            if (registerTosLink) {
+                registerTosLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    // Şimdilik EULA modalı açılıyor, ayrı bir modal eklemek isterseniz burada açabilirsiniz
+                    const eulaModal = document.getElementById('eula-modal');
+                    if (eulaModal) eulaModal.style.display = 'flex';
+                });
+            }
+            // Kayıt butonunu checkbox'lara göre aktif/pasif yap
+            function updateRegisterBtnState() {
+                if (registerEulaCheckbox && registerTosCheckbox && registerSubmitBtn) {
+                    registerSubmitBtn.disabled = !(registerEulaCheckbox.checked && registerTosCheckbox.checked);
+                    if (registerSubmitBtn.disabled) {
+                        registerSubmitBtn.style.background = "#888";
+                        registerSubmitBtn.style.color = "#ccc";
+                        registerSubmitBtn.style.cursor = "not-allowed";
+                    } else {
+                        registerSubmitBtn.style.background = "#ffd700";
+                        registerSubmitBtn.style.color = "#222";
+                        registerSubmitBtn.style.cursor = "pointer";
+                    }
+                }
+            }
+            if (registerEulaCheckbox && registerTosCheckbox) {
+                registerEulaCheckbox.addEventListener('change', updateRegisterBtnState);
+                registerTosCheckbox.addEventListener('change', updateRegisterBtnState);
+                updateRegisterBtnState();
+            }
+
+            const deleteAccountBtn = document.getElementById('delete-account-btn');
+            const deleteAccountConfirmModal = document.getElementById('delete-account-confirm-modal');
+            const deleteAccountVerifyModal = document.getElementById('delete-account-verify-modal');
+            const closeDeleteAccountConfirm = document.getElementById('close-delete-account-confirm');
+            const closeDeleteAccountVerify = document.getElementById('close-delete-account-verify');
+            const deleteAccountConfirmYes = document.getElementById('delete-account-confirm-yes');
+            const deleteAccountConfirmNo = document.getElementById('delete-account-confirm-no');
+            const deleteAccountVerifyTitle = document.getElementById('delete-account-verify-title');
+            const deleteAccountVerifyInput = document.getElementById('delete-account-verify-input');
+            const deleteAccountVerifyPassword = document.getElementById('delete-account-verify-password');
+            const deleteAccountFinalBtn = document.getElementById('delete-account-final-btn');
+            const deleteAccountVerifyError = document.getElementById('delete-account-verify-error');
+            // "Hesabı Sil" butonuna basınca ilk modalı aç
+            if (deleteAccountBtn) {
+                deleteAccountBtn.addEventListener('click', function() {
+                    deleteAccountConfirmModal.style.display = 'flex';
+                });
+            }
+            // İlk modal kapatma
+            if (closeDeleteAccountConfirm) {
+                closeDeleteAccountConfirm.addEventListener('click', function() {
+                    deleteAccountConfirmModal.style.display = 'none';
+                });
+            }
+            // Hayır'a basınca modalı kapat
+            if (deleteAccountConfirmNo) {
+                deleteAccountConfirmNo.addEventListener('click', function() {
+                    deleteAccountConfirmModal.style.display = 'none';
+                });
+            }
+            // Evet'e basınca ikinci modalı aç
+            if (deleteAccountConfirmYes) {
+                deleteAccountConfirmYes.addEventListener('click', function() {
+                    deleteAccountConfirmModal.style.display = 'none';
+                    // Kullanıcı adını modalda göster
+                    const user = JSON.parse(localStorage.getItem('pixelcar_user') || '{}');
+                    deleteAccountVerifyTitle.textContent = `${user.username} hesabı silmek için kullanıcı adınızı doğrulayınız;`;
+                    deleteAccountVerifyInput.value = '';
+                    if (deleteAccountVerifyPassword) deleteAccountVerifyPassword.value = '';
+                    deleteAccountVerifyError.style.display = 'none';
+                    deleteAccountVerifyModal.style.display = 'flex';
+                });
+            }
+            // İkinci modal kapatma
+            if (closeDeleteAccountVerify) {
+                closeDeleteAccountVerify.addEventListener('click', function() {
+                    deleteAccountVerifyModal.style.display = 'none';
+                });
+            }
+            // Hesabı Sil (doğrulama) butonu
+            if (deleteAccountFinalBtn) {
+                deleteAccountFinalBtn.addEventListener('click', async function() {
+                    const user = JSON.parse(localStorage.getItem('pixelcar_user') || '{}');
+                    const inputVal = (deleteAccountVerifyInput.value || '').trim();
+                    const passwordVal = (deleteAccountVerifyPassword && deleteAccountVerifyPassword.value) ? deleteAccountVerifyPassword.value.trim() : '';
+                    if (inputVal !== user.username) {
+                        deleteAccountVerifyError.textContent = "Kullanıcı adını doğru yazmalısınız.";
+                        deleteAccountVerifyError.style.display = 'block';
+                        return;
+                    }
+                    if (!passwordVal) {
+                        deleteAccountVerifyError.textContent = "Şifrenizi yazmalısınız.";
+                        deleteAccountVerifyError.style.display = 'block';
+                        return;
+                    }
+                    try {
+                        // Giriş doğrulaması
+                        const res = await fetch('/api/login-or-register', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ username: inputVal, password: passwordVal })
+                        });
+                        let data = {};
+                        try {
+                            data = await res.json();
+                        } catch {}
+                        if (!res.ok || !data.user || data.user.username !== inputVal) {
+                            deleteAccountVerifyError.textContent = data.error || "Kullanıcı adı veya şifre yanlış.";
+                            deleteAccountVerifyError.style.display = 'block';
+                            return;
+                        }
+                        // Hesabı silme isteği gönderirken şifreyi de gönder!
+                        const delRes = await fetch('/api/delete-account', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ username: inputVal, password: passwordVal })
+                        });
+                        if (!delRes.ok) {
+                            let delData = {};
+                            try { delData = await delRes.json(); } catch {}
+                            deleteAccountVerifyError.textContent = delData.error || "Hesap silinemedi.";
+                            deleteAccountVerifyError.style.display = 'block';
+                            return;
+                        }
+                    } catch (err) {
+                        deleteAccountVerifyError.textContent = "Sunucuya ulaşılamadı.";
+                        deleteAccountVerifyError.style.display = 'block';
+                        return;
+                    }
+                    deleteAccountVerifyError.style.display = 'none';
+                    localStorage.removeItem('pixelcar_user');
+                    deleteAccountVerifyModal.style.display = 'none';
+                    window.location.reload();
+                });
+            }
+            // Modal dışına tıklayınca kapat
+            window.addEventListener('click', function(e) {
+                if (e.target === deleteAccountConfirmModal) deleteAccountConfirmModal.style.display = 'none';
+                if (e.target === deleteAccountVerifyModal) deleteAccountVerifyModal.style.display = 'none';
+            });
         });
     </script>
 </body>

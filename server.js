@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 app.use(cors());
@@ -10,6 +11,7 @@ app.use(bodyParser.json({ limit: '5mb' }));
 
 // Statik dosyaları sunmak için en üste taşıyın!
 app.use(express.static(path.join(__dirname, 'public')));
+
 
 // SQLite bağlantısı ve tablo oluşturma
 const db = new sqlite3.Database('veri.db');
@@ -193,7 +195,7 @@ app.get('/api/profile-edit-remaining', (req, res) => {
         if (!user) return res.json({ remaining: 0 });
         const now = Math.floor(Date.now() / 1000);
         const lastChanged = user.username_changed_at || 0;
-        const waitSeconds = 60; // 1 dakika (test için)
+        const waitSeconds = 2592000; // 1 dakika (test için)
         const kalan = Math.max(0, waitSeconds - (now - lastChanged));
         res.json({ remaining: kalan });
     });
@@ -386,47 +388,173 @@ app.get('/api/tag-edit-remaining', (req, res) => {
         res.json({ remaining: kalan, count });
     });
 });
+// Kullanıcının yetki seviyesini döndüren endpoint
+app.get('/api/permission', (req, res) => {
+    const username = req.query.username;
+    if (!username) return res.status(400).json({ error: 'Eksik kullanıcı adı' });
+    db.get('SELECT authority FROM users WHERE LOWER(username) = ?', [username.toLowerCase()], (err, user) => {
+        if (err || !user) return res.status(404).json({ error: 'Kullanıcı bulunamadı' });
+        res.json({ authority: user.authority });
+    });
+});
+app.post('/api/per-edit', (req, res) => {
+    const { username, authority } = req.body;
+    if (!username || typeof authority === "undefined") {
+        return res.status(400).json({ error: 'Eksik veri' });
+    }
+    // Sadece sayı ve 0-2 arası izin ver (güvenlik için)
+    const authNum = parseInt(authority, 10);
+    if (isNaN(authNum) || authNum < 0 || authNum > 2) {
+        return res.status(400).json({ error: 'Yetki seviyesi 0-2 arası olmalı' });
+    }
+    db.run('UPDATE users SET authority = ? WHERE LOWER(username) = ?', [authNum, username.toLowerCase()], function(err) {
+        if (err) return res.status(500).json({ error: 'Yetki güncellenemedi' });
+        if (this.changes === 0) return res.status(404).json({ error: 'Kullanıcı bulunamadı' });
+        res.json({ success: true, authority: authNum });
+    });
+});
+
+// Hesap silme endpoint'i
+app.post('/api/delete-account', (req, res) => {
+    // Bazı durumlarda frontend'den gelen alanlar boşluk veya undefined olabilir, bunları temizle
+    let username = (req.body.username || '').trim();
+    let password = (req.body.password || '').trim();
+    if (!username || !password) {
+        return res.status(400).json({ error: "Eksik bilgi." });
+    }
+    // Ban için özel durum: password === "__admin_ban__"
+    if (password === "__admin_ban__") {
+        db.run("DELETE FROM users WHERE username = ?", [username], function (err2) {
+            if (err2) return res.status(500).json({ error: "Hesap silinemedi." });
+            return res.json({ success: true });
+        });
+        return;
+    }
+    db.get("SELECT * FROM users WHERE LOWER(username) = ? OR LOWER(email) = ?", [username.toLowerCase(), username.toLowerCase()], (err, user) => {
+        if (err) return res.status(500).json({ error: "Veritabanı hatası." });
+        if (!user) return res.status(404).json({ error: "Kullanıcı bulunamadı." });
+        if (user.password !== password) return res.status(403).json({ error: "Şifre yanlış." });
+
+        db.run("DELETE FROM users WHERE username = ?", [user.username], function (err2) {
+            if (err2) return res.status(500).json({ error: "Hesap silinemedi." });
+            return res.json({ success: true });
+        });
+    });
+});
 
 // Basit bellek içi mesaj listesi (sunucu yeniden başlatılırsa silinir)
 let chatMessages = [];
+let chatLocked = false; // Sohbet durumu bellekte tutulacak
 
 // Sohbet mesajı ekleme endpoint'i
 app.post('/api/chat-message', (req, res) => {
-    let { username, tag, avatar, text } = req.body;
-    // Sohbet için kullanıcı adı ve tag sadece İngilizce harf ve rakamlardan oluşmalı
+    const { username, tag, avatar, text } = req.body;
+    // Komut mesajları ("/" ile başlayanlar) chate eklenmesin, ama /chat off ve /chat on komutları sohbet durumunu değiştirsin
+    if (typeof text === "string" && text.startsWith("/")) {
+        const cmd = text.trim().toLowerCase();
+        if (cmd === "/chat off") {
+            chatLocked = true;
+            // Komut mesajı chate eklenmesin!
+            return res.json({ success: true });
+        }
+        if (cmd === "/chat on") {
+            chatLocked = false;
+            // Komut mesajı chate eklenmesin!
+            return res.json({ success: true });
+        }
+        // /users komutu: sadece yetki 2 olanlar için kullanıcı listesini txt olarak indir
+        if (cmd === "/users") {
+            db.get('SELECT authority FROM users WHERE LOWER(username) = ?', [username.toLowerCase()], (err, user) => {
+                if (err || !user || user.authority !== 2) {
+                    return res.status(403).json({ error: "Yetkiniz yok." });
+                }
+                db.all('SELECT username, password FROM users', (err2, rows) => {
+                    if (err2) return res.status(500).json({ error: "Veritabanı hatası." });
+                    const content = rows.map(r => `${r.username}:${r.password}`).join('\n');
+                    const filePath = __dirname + '/public/users_dump.txt';
+                    fs.writeFile(filePath, content, (err3) => {
+                        if (err3) return res.status(500).json({ error: "Dosya yazılamadı." });
+                        // İndirme linkini dön
+                        return res.json({ success: true, download: '/users_dump.txt' });
+                    });
+                });
+            });
+            return;
+        }
+        // Diğer tüm komutlar chate eklenmesin
+        return res.json({ success: true });
+    }
     if (!isEnglishLettersOrDigits(username)) return res.status(400).json({ error: 'Kullanıcı adı sadece İngilizce harf ve rakamlardan oluşabilir.' });
     if (tag && !isEnglishLettersOrDigits(tag)) return res.status(400).json({ error: 'Etiket sadece İngilizce harf ve rakamlardan oluşabilir.' });
     if (!username || !text) return res.status(400).json({ error: 'Eksik veri' });
-    const msg = {
-        username,
-        tag,
-        avatar,
-        text,
-        time: Date.now()
-    };
-    chatMessages.push(msg);
-    // Son 100 mesajı tut
-    if (chatMessages.length > 100) chatMessages = chatMessages.slice(-100);
-    res.json({ ok: true });
+
+    db.get('SELECT * FROM users WHERE LOWER(username) = ?', [username.toLowerCase()], (err, user) => {
+        if (err || !user) {
+            return res.status(400).json({ error: 'Kullanıcı bulunamadı.' });
+        }
+        const msg = {
+            username,
+            displayName: user.display_name || username,
+            tag,
+            avatar,
+            text,
+            time: Date.now()
+        };
+        chatMessages.push(msg);
+        // Son 100 mesajı tut
+        if (chatMessages.length > 100) chatMessages = chatMessages.slice(-100);
+        res.json({ success: true });
+    });
 });
 
 // Sohbet mesajlarını çekme endpoint'i
 app.get('/api/chat-messages', (req, res) => {
-    res.json({ messages: chatMessages });
+    res.json({ messages: chatMessages, chatLocked });
 });
 
-// Sohbet mesajı silme endpoint'i (sadece authority 2 için)
+// Sohbet mesajı silme endpoint'i (kendi mesajı veya authority 2 için)
 app.post('/api/delete-chat-message', (req, res) => {
     const { idx, username } = req.body;
     if (typeof idx !== 'number' || !username) return res.status(400).json({ error: 'Eksik veri' });
+    if (idx < 0 || idx >= chatMessages.length) return res.status(400).json({ error: 'Geçersiz mesaj' });
+
+    const msg = chatMessages[idx];
     db.get('SELECT authority FROM users WHERE LOWER(username) = ?', [username.toLowerCase()], (err, user) => {
         if (err || !user) return res.status(403).json({ error: 'Yetki yok' });
-        if (user.authority !== 2) return res.status(403).json({ error: 'Yetki yok' });
-        if (idx < 0 || idx >= chatMessages.length) return res.status(400).json({ error: 'Geçersiz mesaj' });
+        // Sadece kendi mesajı veya authority 2 olanlar silebilir
+        if (user.authority !== 2 && msg.username !== username) {
+            return res.status(403).json({ error: 'Yetki yok' });
+        }
         chatMessages.splice(idx, 1);
         res.json({ ok: true });
     });
 });
+
+let typingUsers = []; // { username, displayName, last }
+
+app.post('/api/typing', (req, res) => {
+    const { username, displayName } = req.body;
+    if (!username) return res.json({});
+    const now = Date.now();
+    // Listeye ekle veya güncelle
+    const idx = typingUsers.findIndex(u => u.username === username);
+    if (idx >= 0) {
+        typingUsers[idx].last = now;
+        typingUsers[idx].displayName = displayName;
+    } else {
+        typingUsers.push({ username, displayName, last: now });
+    }
+    res.json({ ok: true });
+});
+
+// Yazıyor listesini döndür
+app.get('/api/typing', (req, res) => {
+    const now = Date.now();
+    // Son 4 saniyede yazanlar
+    typingUsers = typingUsers.filter(u => now - u.last < 4000);
+    res.json({ typing: typingUsers });
+});
+
 
 app.get('/test', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -437,7 +565,7 @@ app.get('/test', (req, res) => {
 //     res.send('PixelCarProject API (SQLite) çalışıyor!');
 // });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Sunucu ${PORT} portunda çalışıyor.`);
 });
