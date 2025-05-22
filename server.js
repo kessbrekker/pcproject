@@ -530,29 +530,59 @@ app.post('/api/delete-chat-message', (req, res) => {
     });
 });
 
-let typingUsers = []; // { username, displayName, last }
+// Sohbeti temizleme endpoint'i
+app.post('/api/clear-chat', (req, res) => {
+    const { username } = req.body;
+    db.get('SELECT authority FROM users WHERE LOWER(username) = ?', [username.toLowerCase()], (err, user) => {
+        if (err || !user || user.authority !== 2) {
+            return res.status(403).json({ error: "Yetkiniz yok." });
+        }
+        chatMessages = [];
+        res.json({ success: true });
+    });
+});
+
+let typingUsers = []; // { username, displayName, last, timeout }
 
 app.post('/api/typing', (req, res) => {
-    const { username, displayName } = req.body;
+    const { username, displayName, onlineTimeout } = req.body;
     if (!username) return res.json({});
     const now = Date.now();
+    // Online timeout süresi (varsayılan 2dk, client'tan gelirse onu kullan)
+    let timeout = 2 * 60 * 1000;
+    if (typeof onlineTimeout === "number" && onlineTimeout >= 10000 && onlineTimeout <= 10 * 60 * 1000) {
+        timeout = onlineTimeout;
+    }
     // Listeye ekle veya güncelle
     const idx = typingUsers.findIndex(u => u.username === username);
     if (idx >= 0) {
         typingUsers[idx].last = now;
         typingUsers[idx].displayName = displayName;
+        typingUsers[idx].timeout = timeout;
     } else {
-        typingUsers.push({ username, displayName, last: now });
+        typingUsers.push({ username, displayName, last: now, timeout });
     }
     res.json({ ok: true });
 });
 
-// Yazıyor listesini döndür
+// Yazıyor listesini döndür (son 4 saniyede yazanlar)
 app.get('/api/typing', (req, res) => {
     const now = Date.now();
-    // Son 4 saniyede yazanlar
     typingUsers = typingUsers.filter(u => now - u.last < 4000);
     res.json({ typing: typingUsers });
+});
+
+// Gerçek online kullanıcıları döndüren endpoint (timeout'u kullanıcıya göre belirle)
+app.get('/api/online-users', (req, res) => {
+    const now = Date.now();
+    // Her kullanıcı için kendi timeout'u kullanılır (default 2dk)
+    const unique = {};
+    typingUsers.forEach(u => {
+        const t = typeof u.timeout === "number" ? u.timeout : 2 * 60 * 1000;
+        if (now - u.last < t) unique[u.username] = true;
+    });
+    const onlineList = Object.keys(unique);
+    res.json({ count: onlineList.length, users: onlineList });
 });
 
 
